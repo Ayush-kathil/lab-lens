@@ -1,0 +1,42 @@
+# Dataset Duplicate Analysis
+
+- Total Images Scanned: 4604
+- Total Duplicate Groups: 82
+- Cross-Split Leakage Exists: True
+
+## Cross-Split Leakage Details
+- [('IMG_20250102_154632_jpg.rf.ef9a5d6f80dc2f43e3911dcac8b15ba2.jpg', 'test'), ('IMG_20250102_154539vpii-16-_jpg.rf.deafd072422a313d4b7cd25720ad4394.jpg', 'train')]
+- [('IMG_20250102_154952_jpg.rf.eed46949154b3878f109a311c3effa11.jpg', 'test'), ('IMG_20250102_154539vpii-39-_jpg.rf.5afb4d5d6ac7b96a9d77bbb24626dc2c.jpg', 'train')]
+- [('IMG_20250102_155000_jpg.rf.5d6d360e3cd7cb50001aa18ff4cc98ee.jpg', 'test'), ('IMG_20250102_154539vpii-53-_jpg.rf.0982069801e3c27de70eb98bc859bba7.jpg', 'train')]
+- [('IMG_20250102_154539vpii-2-_jpg.rf.0d1a8a53607478711fb5c457f0a879c5.jpg', 'test'), ('IMG_20250102_154541_jpg.rf.948299928d7ee79f85716176b80a93f6.jpg', 'train')]
+- [('IMG_20250102_154539vpii-6-_jpg.rf.87744cee05fdb5191871ad8b49c32ae5.jpg', 'test'), ('IMG_20250102_154551_jpg.rf.f394694758c91258fe15761ddfd8b8ad.jpg', 'train')]
+- [('IMG_20250102_154539vpii-34-_jpg.rf.8da66fb71ff12445d60375547083d3f5.jpg', 'test'), ('IMG_20250102_154854_jpg.rf.f2fbdb832a48381daba2a226a484211e.jpg', 'train')]
+- [('IMG_20250102_154539vpii-73-_jpg.rf.19cb64a3d4814c19960c8f5bdd9571c2.jpg', 'test'), ('IMG_20250102_155041_jpg.rf.2d879828ebfac868acf05713bf46bdcd.jpg', 'train')]
+- [('IMG_20250102_154539vpii-65-_jpg.rf.b97088e5beb83ce048721a010da9c289.jpg', 'test'), ('IMG_20250102_155240_jpg.rf.5a6e4cb7436539a27f7654103cd7c476.jpg', 'train')]
+- [('IMG_20250102_154629_jpg.rf.34c33406ddfed2c2e7a8a8a9437f3352.jpg', 'train'), ('IMG_20250102_154539vpii-15-_jpg.rf.c0928fab67a68afef58dfe9d5dc17bb1.jpg', 'valid')]
+- [('IMG_20250102_154544_jpg.rf.a40b46132e9ce83f125601fa408317f5.jpg', 'test'), ('IMG_20250102_154539vpii-3-_jpg.rf.bb88c760497442930f9d715128c395c2.jpg', 'valid')]
+- [('IMG_20250102_154923_jpg.rf.4e9aa5566b1b54d67ce196f124961073.jpg', 'train'), ('IMG_20250102_154539vpii-35-_jpg.rf.211bef0c2c4952bd60047a907dfe9f34.jpg', 'valid')]
+- [('IMG_20250102_154930_jpg.rf.99a47da09b397543b5deee995f68b0bd.jpg', 'train'), ('IMG_20250102_154539vpii-37-_jpg.rf.4f22c20cf72e15748c4bd0099627ecfc.jpg', 'valid')]
+- [('IMG_20250102_154549_jpg.rf.4d64f312ea2f691306dd644f24cd0a10.jpg', 'train'), ('IMG_20250102_154539vpii-5-_jpg.rf.c95cfe4d5c57406b6ac746c7d0c05701.jpg', 'valid')]
+- [('IMG_20250102_154955_jpg.rf.ccd046740b46842528e78ae805453933.jpg', 'train'), ('IMG_20250102_154539vpii-51-_jpg.rf.6a241505c1b8fbad0a3b6cb8f71722e1.jpg', 'valid')]
+- [('IMG_20250102_155302_jpg.rf.fc62113228e7a9a5cba0133978ee9b53.jpg', 'train'), ('IMG_20250102_154539vpii-67-_jpg.rf.3039b30f06b9a7d752b98c6c9a06bc5c.jpg', 'valid')]
+- [('IMG_20250102_155349_jpg.rf.46862d10952b7167e897c75d57362370.jpg', 'train'), ('IMG_20250102_154539vpii-71-_jpg.rf.45c139b7e56bba0baac60993c06e3713.jpg', 'valid')]
+- [('IMG_20250102_155210_jpg.rf.66fd5ce36601fea36078e6a51e5afac4.jpg', 'train'), ('IMG_20250102_154539vpii-76-_jpg.rf.973a2e6b41df8eeee95fed473ac5134c.jpg', 'valid')]
+- [('IMG_20250102_155305_jpg.rf.bb1c9adf247f2601722d1accd3126842.jpg', 'train'), ('IMG_20250102_154539vpii-79-_jpg.rf.5d9145e007a1a13407303b6d6ea649ac.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-8-_jpg.rf.3a9e0a9019e74eb0cf7482320b835f97.jpg', 'train'), ('IMG_20250102_154559_jpg.rf.0ded57b3236bda6b4b06eeb17a9cf0e3.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-11-_jpg.rf.638bc61786725bfcb8302c924e15ed73.jpg', 'train'), ('IMG_20250102_154613_jpg.rf.cd0aa50a7e564ea19f339b43c62b8b77.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-24-_jpg.rf.de444083b496d050bf84ee3f48f173b4.jpg', 'train'), ('IMG_20250102_154701_jpg.rf.c93615ae4220c08aa7a4fe278e318695.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-18-_jpg.rf.2eef27a74c3c38e17abce3c8c0e3457c.jpg', 'train'), ('IMG_20250102_154713_jpg.rf.72944dfd029d8a99c1c4746afa638115.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-27-_jpg.rf.1f4f1c6af895ed55e342667ef56f40e2.jpg', 'train'), ('IMG_20250102_154734_jpg.rf.88c77fd03fb6164023a8b813ff17c5c3.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-20-_jpg.rf.2f0eb1135df28227918e7353e05d5d70.jpg', 'train'), ('IMG_20250102_154825_jpg.rf.1966a9156353ab68a42521f089a0cec5.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-28-_jpg.rf.59f521f0e0ee52724a0253bd8dfe9d5a.jpg', 'train'), ('IMG_20250102_154827_jpg.rf.a0c902363bd3977c502c0297831e1511.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-30-_jpg.rf.cf15dd85e9c0920235b5fa753b79d63e.jpg', 'test'), ('IMG_20250102_154833_jpg.rf.040a8b1ba45a34d82db2b4fe6fa01c0c.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-31-_jpg.rf.306c3a1d890fc3c6504b635a1547e1f2.jpg', 'test'), ('IMG_20250102_154836_jpg.rf.d444f77938067d7485a1ee0624dc396d.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-33-_jpg.rf.933d2647513a18bdd7b61e5bc71d969b.jpg', 'train'), ('IMG_20250102_154851_jpg.rf.ad1fd97e415b820a29f4b5809d0e7089.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-41-_jpg.rf.e146dc340b90a6e9f883e2557c96aae3.jpg', 'test'), ('IMG_20250102_155012_jpg.rf.ad195b912cf7754981e870c08a1e19f7.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-55-_jpg.rf.a40c0006aa5c22ca86bcc0ae70957339.jpg', 'train'), ('IMG_20250102_155019_jpg.rf.bc6a8d33e42edd31f35f93cc4d32a963.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-57-_jpg.rf.babe2d3972db5b2ab83c491b61ca1a46.jpg', 'test'), ('IMG_20250102_155025_jpg.rf.faa4eb5b8fa6d651680a49742c769b25.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-59-_jpg.rf.f8f88323b8c99fc30ed5493969436be1.jpg', 'train'), ('IMG_20250102_155038_jpg.rf.42c7db89dd0e5d6a36cd5196c0f920f9.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-42-_jpg.rf.810592a34eb6ab164152ea5102b892a8.jpg', 'train'), ('IMG_20250102_155101_jpg.rf.1d7d84ec15385062cda78641a1e8e223.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-62-_jpg.rf.12840254a125563e9744a61a88a9843d.jpg', 'train'), ('IMG_20250102_155128_jpg.rf.d2b1f84089d826668852e1504a5128b6.jpg', 'valid')]
+- [('IMG_20250102_154539vpii-70-_jpg.rf.9045cf640ec12831e1a9a965edf77c23.jpg', 'train'), ('IMG_20250102_155327_jpg.rf.74f96b8ed27675acb83452c49681da29.jpg', 'valid')]

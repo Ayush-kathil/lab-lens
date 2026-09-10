@@ -1,39 +1,62 @@
 import hashlib
 from pathlib import Path
 import argparse
+import json
 
-def check_duplicates(dataset_dir):
+def analyze_duplicates(dataset_dir):
     dataset_root = Path(dataset_dir).resolve()
-    
-    file_names = {}
-    file_hashes = {}
-    
-    dup_names = []
-    dup_hashes = []
-    
     images = list(dataset_root.rglob("*.jpg")) + list(dataset_root.rglob("*.png"))
     
+    file_hashes = {}
+    dup_groups = {}
+    
     for img in images:
-        name = img.name
-        if name in file_names:
-            dup_names.append((str(img), str(file_names[name])))
-        else:
-            file_names[name] = img
+        split = "unknown"
+        if "train" in img.parts: split = "train"
+        elif "valid" in img.parts or "val" in img.parts: split = "valid"
+        elif "test" in img.parts: split = "test"
             
-        # Lightweight hash (first 100k)
         with open(img, 'rb') as f:
             h = hashlib.md5(f.read(100000)).hexdigest()
-        if h in file_hashes:
-            dup_hashes.append((str(img), str(file_hashes[h])))
+            
+        if h not in file_hashes:
+            file_hashes[h] = [(str(img.name), split)]
         else:
-            file_hashes[h] = img
+            file_hashes[h].append((str(img.name), split))
+            dup_groups[h] = file_hashes[h]
+
+    total_groups = len(dup_groups)
+    cross_split_leakage = False
+    leakage_details = []
+    
+    for h, group in dup_groups.items():
+        splits_involved = {item[1] for item in group}
+        if len(splits_involved) > 1:
+            cross_split_leakage = True
+            leakage_details.append(group)
             
     print(f"Total Images Scanned: {len(images)}")
-    print(f"Duplicate Filenames: {len(dup_names)}")
-    print(f"Duplicate Hashes (Exact content dupes): {len(dup_hashes)}")
+    print(f"Total Duplicate Groups: {total_groups}")
+    print(f"Cross-Split Leakage Exists: {cross_split_leakage}")
+    if cross_split_leakage:
+        print("LEAKAGE FOUND:")
+        for g in leakage_details:
+            print(f" - {g}")
+            
+    with open("docs/DATASET_DUPLICATE_ANALYSIS.md", "w") as f:
+        f.write("# Dataset Duplicate Analysis\n\n")
+        f.write(f"- Total Images Scanned: {len(images)}\n")
+        f.write(f"- Total Duplicate Groups: {total_groups}\n")
+        f.write(f"- Cross-Split Leakage Exists: {cross_split_leakage}\n\n")
+        if cross_split_leakage:
+            f.write("## Cross-Split Leakage Details\n")
+            for g in leakage_details:
+                f.write(f"- {g}\n")
+        else:
+            f.write("No identical image files exist across train, validation, and test splits.\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', required=True)
     args = parser.parse_args()
-    check_duplicates(args.dataset)
+    analyze_duplicates(args.dataset)
