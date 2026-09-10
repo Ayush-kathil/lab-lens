@@ -1,9 +1,13 @@
-model: YOLOv8n
+model: yolov8n.pt
 dataset: Dataset/ChemEq25_training/data.yaml
-epochs: 100
+epochs: 1  # Reduced to 1 due to strict CPU-only constraints for this baseline
 batch_size: 16
 image_size: 640
-device: 'cpu'  # Will be overridden by hardware detection if GPU is available
+fraction: 0.05  # Train on 5% of data to allow CPU execution within limits
+device: 'cpu'
 seed: 42
+deterministic: True
 confidence_threshold: 0.25
-output_directory: outputs/training
+project: outputs
+name: baseline_training
+workers: 0

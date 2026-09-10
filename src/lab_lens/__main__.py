@@ -41,6 +41,7 @@ def main():
     tr_parser.add_argument("--dataset", required=True, help="Path to dataset")
     tr_parser.add_argument("--config", required=True, help="Path to training config")
     tr_parser.add_argument("--dry-run", action="store_true", help="Print config without training")
+    tr_parser.add_argument("--smoke-test", action="store_true", help="Run a 1-epoch tiny training run")
 
     # evaluate
     ev_parser = subparsers.add_parser("evaluate", help="Evaluate the detector")
@@ -75,6 +76,7 @@ def main():
     elif args.command == "train":
         cmd = ["--dataset", args.dataset, "--config", args.config]
         if args.dry_run: cmd.append("--dry-run")
+        if args.smoke_test: cmd.append("--smoke-test")
         run_script("train_detector.py", *cmd)
     elif args.command == "evaluate":
         run_script("evaluate_detector.py", "--model", args.model, "--dataset", args.dataset)

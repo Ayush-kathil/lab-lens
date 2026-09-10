@@ -3,6 +3,13 @@ import sys
 import yaml
 from pathlib import Path
 
+try:
+    from ultralytics import YOLO
+    import torch
+    ULTRALYTICS_AVAILABLE = True
+except ImportError:
+    ULTRALYTICS_AVAILABLE = False
+
 def validate_config(config_path):
     if not Path(config_path).exists():
         print(f"Error: Configuration file not found at {config_path}")
@@ -57,6 +64,7 @@ def main():
     parser.add_argument('--dataset', required=True, help="Path to training dataset directory")
     parser.add_argument('--config', required=True, help="Path to training configuration yaml")
     parser.add_argument('--dry-run', action='store_true', help="Print configuration without training")
+    parser.add_argument('--smoke-test', action='store_true', help="Run a 1-epoch tiny training run")
     args = parser.parse_args()
 
     config = validate_config(args.config)
@@ -74,7 +82,9 @@ def main():
     print(f"Image Size          : {config.get('image_size', 'Unknown')}")
     print(f"Device              : {config.get('device', 'Unknown')}")
     print(f"Seed                : {config.get('seed', 'Unknown')}")
-    print(f"Output Directory    : {config.get('output_directory', 'Unknown')}")
+    print(f"Project             : {config.get('project', 'Unknown')}")
+    print(f"Name                : {config.get('name', 'Unknown')}")
+    print(f"Deterministic       : {config.get('deterministic', True)}")
     print("--- Frameworks ---")
     print(f"PyTorch             : {versions['torch']}")
     print(f"Ultralytics         : {versions['ultralytics']}")
@@ -84,9 +94,58 @@ def main():
         print("\nDry-run completed. No training started.")
         sys.exit(0)
         
-    print("\nError: Real training is not authorized in this phase.")
-    print("Please use --dry-run for testing.")
-    sys.exit(1)
+    if not ULTRALYTICS_AVAILABLE:
+        print("Error: ultralytics is required for real training.")
+        sys.exit(1)
+
+    # Resolve actual paths relative to current working directory
+    data_yaml_path = Path(args.dataset) / "data.yaml"
+    model_name = config.get('model', 'yolov8n.pt')
+    
+    epochs = config.get('epochs', 1)
+    batch = config.get('batch_size', 16)
+    imgsz = config.get('image_size', 640)
+    name = config.get('name', 'baseline_training')
+    
+    if args.smoke_test:
+        print("\n--- SMOKE TEST OVERRIDE ---")
+        epochs = 1
+        batch = 2
+        name = "smoke_test"
+        print(f"Forcing Epochs: {epochs}, Batch Size: {batch}, Name: {name}")
+
+    print("\nInitializing YOLO model...")
+    import torch
+    import ultralytics
+    # PyTorch 2.6 defaults to weights_only=True which breaks older Ultralytics weights
+    original_torch_load = torch.load
+    def safe_torch_load(*args, **kwargs):
+        kwargs["weights_only"] = False
+        return original_torch_load(*args, **kwargs)
+    torch.load = safe_torch_load
+        
+    model = YOLO(model_name)
+    
+    print("\nStarting training...")
+    try:
+        results = model.train(
+            data=str(data_yaml_path.resolve()),
+            epochs=epochs,
+            imgsz=imgsz,
+            batch=batch,
+            device=config.get('device', 'cpu'),
+            seed=config.get('seed', 42),
+            deterministic=config.get('deterministic', True),
+            project=config.get('project', 'outputs'),
+            name=name,
+            workers=config.get('workers', 4),
+            fraction=config.get('fraction', 1.0),
+            val=True
+        )
+        print("\nTraining completed successfully.")
+    except Exception as e:
+        print(f"\nError during training: {e}")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
