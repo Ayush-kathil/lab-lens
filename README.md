@@ -46,21 +46,23 @@ pip install -r requirements.txt
 ## Dataset Setup
 1. Download ChemEq25 from Mendeley Data.
 2. Place it in `Dataset/ChemEq25/` at the project root.
-3. Validate: `python -m Lab Lens validate-dataset`
+3. Validate: `python -m lab_lens validate-dataset`
 
 ## Training
 ```bash
-python -m Lab Lens train --config configs/default.yaml
+python -m lab_lens train --config configs/default.yaml
 ```
 
 ## Evaluation
 ```bash
-python -m Lab Lens evaluate --model outputs/best.pt
+python -m lab_lens evaluate --model outputs/best.pt
 ```
 
 ## CLI Usage
 ```bash
-python -m Lab Lens analyze --input path/to/image.jpg --config configs/lab_setup.yaml
+python -m lab_lens quality --input path/to/image.jpg
+python -m lab_lens audit-dataset-pairs --dataset Dataset/ChemEq25
+python -m lab_lens analyze --input path/to/image.jpg --config configs/lab_setup.yaml
 ```
 
 ## Example Output
