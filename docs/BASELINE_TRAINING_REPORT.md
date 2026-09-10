@@ -1,13 +1,13 @@
-# Baseline Training Report
+# Pipeline Smoke/Diagnostic Training Run
 
 **Date/Time:** 2026-09-11
-**Git Commit SHA:** 6238959
+**Git Commit SHA:** 0bc52d8
 **Model:** YOLOv8n
 **Dataset Path:** Dataset/ChemEq25_training/data.yaml
-**Split Counts:** Train: 3103, Valid: 900, Test: 455
+**Subset Definition:** 5% fraction (155 training images) due to CPU constraints
 **Image Size:** 640
 **Batch Size:** 16 (Actual CPU baseline)
-**Epochs:** 3
+**Epochs:** 1
 **Device:** CPU
 **Seed:** 42
 
@@ -28,10 +28,17 @@
 ## Training Run
 - **Output Location:** `outputs/baseline_training/`
 - **Duration:** ~45 seconds for 1 epoch on 5% fraction (10 batches)
-- **Validation Metrics:** N/A (Validation step crashed due to `torchvision::nms` mismatch)
+- **Validation Metrics:** N/A (Validation step crashed)
 - **Warnings/Errors:**
   - `UserWarning: 'pin_memory' argument is set as true but no accelerator is found`
-  - `_pickle.UnpicklingError: Weights only load failed` (Resolved via monkeypatching `torch.load`)
-  - `Error during training: operator torchvision::nms does not exist` (Crashed during validation NMS step because `torchvision-0.29.0` was installed against system `torch` missing compiled ops)
+  - `_pickle.UnpicklingError: Weights only load failed` (Resolved via monkeypatching `torch.load` initially)
+  - `Error during training: operator torchvision::nms does not exist`
 
-*Note: This represents the controlled CPU educational baseline. Training mechanics (dataset loading, optimizer, forward/backward passes) were fully validated. Model evaluation was interrupted by a Windows CPU-specific `torchvision` C++ extension issue, but the training pipeline logic in `train_detector.py` is fully verified and reproducible.*
+### Root Cause Analysis & Remediation
+The crash occurred during the validation NMS step because `torchvision-0.29.0` (which requires PyTorch 2.14) was installed against the system's PyTorch `2.12.0+cpu`. This ABI mismatch meant compiled C++ operators (like NMS) were missing. 
+
+**Remediation:**
+1. Installed `torchvision==0.27.0` which is perfectly binary-compatible with `torch==2.12.0+cpu`.
+2. Verified `torchvision.ops.nms` executes successfully.
+3. Upgraded `ultralytics` to `8.4.146` (with `--no-deps`) which natively handles the PyTorch 2.6 `weights_only=True` unpickling behavior, safely eliminating the need for any `torch.load` monkeypatch.
+4. Set `workers: 0` explicitly in the baseline config to prevent Windows CPU dataloader freezing.

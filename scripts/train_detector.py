@@ -117,13 +117,6 @@ def main():
     print("\nInitializing YOLO model...")
     import torch
     import ultralytics
-    # PyTorch 2.6 defaults to weights_only=True which breaks older Ultralytics weights
-    original_torch_load = torch.load
-    def safe_torch_load(*args, **kwargs):
-        kwargs["weights_only"] = False
-        return original_torch_load(*args, **kwargs)
-    torch.load = safe_torch_load
-        
     model = YOLO(model_name)
     
     print("\nStarting training...")
