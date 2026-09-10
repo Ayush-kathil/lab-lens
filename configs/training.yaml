@@ -1,6 +1,6 @@
 model: yolov8n.pt
 dataset: Dataset/ChemEq25_training/data.yaml
-epochs: 100
+epochs: 3
 batch_size: 16
 image_size: 640
 device: 'cpu'
