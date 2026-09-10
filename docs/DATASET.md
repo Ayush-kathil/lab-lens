@@ -7,6 +7,15 @@
 - **License**: CC BY 4.0
 - **Format**: YOLO / COCO-compatible annotations
 
+## Dataset Provenance
+
+*   **Original Mendeley artifact:** REJECTED FOR TRAINING
+    *   *The downloaded Mendeley archive was unsuitable for deterministic image-annotation pairing because the extracted filenames were irreversibly truncated.*
+*   **Roboflow distribution:** UNAVAILABLE / NOT USED
+*   **Official Figshare artifact:** CURRENT CANDIDATE
+    *   *Source: https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433*
+    *   *Structure: Contains full length un-truncated filenames allowing exact 1-to-1 mapping.*
+
 ## Characteristics
 The dataset is intended for laboratory apparatus detection.
 According to the source, the dataset characteristics are:

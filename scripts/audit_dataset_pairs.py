@@ -23,7 +23,13 @@ def audit_dataset_pairs(dataset_dir):
     }
 
     for split in splits:
-        split_path = dataset_path / split
+        # Search for the split folder
+        split_paths = list(dataset_path.rglob(f"{split}/images"))
+        if not split_paths:
+            report['splits'][split] = {'error': 'Missing images directory'}
+            continue
+        
+        split_path = split_paths[0].parent
         img_dir = split_path / 'images'
         lbl_dir = split_path / 'labels'
         

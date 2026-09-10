@@ -4,13 +4,13 @@ from pathlib import Path
 
 def inspect(dataset_dir: str):
     dataset_path = Path(dataset_dir)
-    yaml_path = dataset_path / "data.yaml"
-    
-    if not yaml_path.exists():
+    data_yaml_paths = list(dataset_path.rglob("data.yaml"))
+    if not data_yaml_paths:
         print("data.yaml not found.")
         return
         
-    with open(yaml_path, 'r') as f:
+    data_yaml_path = data_yaml_paths[0]
+    with open(data_yaml_path, 'r', encoding='utf-8') as f:
         data = yaml.safe_load(f)
         
     print("Dataset Inspection Report")

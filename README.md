@@ -32,9 +32,14 @@ Lab Lens is built with a modular Python architecture. Key boundaries include:
 - Bounding Box Intersection & Spatial Mapping
 - Deep Learning-based Object Detection (YOLO-family)
 
-## Dataset
-The primary dataset is **ChemEq25** (Version 5), containing 4,599 annotated images of 25 lab apparatus categories. 
-*Note: The raw dataset is kept out of Git to maintain repository health.*
+## Dataset Usage
+
+Lab Lens uses the **ChemEq25** dataset as the primary laboratory-equipment detection dataset.
+
+*   **Dataset Source:** Official Figshare distribution ([Link](https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433))
+*   **License:** CC BY 4.0
+
+*Note: The dataset is NOT committed to Git. The project expects the dataset to be located in the local `Dataset/ChemEq25_figshare/` directory.*
 
 ## Installation
 ```bash
@@ -44,9 +49,9 @@ pip install -r requirements.txt
 ```
 
 ## Dataset Setup
-1. Download ChemEq25 from Mendeley Data.
-2. Place it in `Dataset/ChemEq25/` at the project root.
-3. Validate: `python -m lab_lens validate-dataset`
+1. Download the official ChemEq25 dataset from Figshare.
+2. Place it in `Dataset/ChemEq25_figshare/` at the project root and extract the `.rar` file inside it.
+3. Validate: `python -m lab_lens validate-dataset --dataset Dataset/ChemEq25_figshare`
 
 ## Training
 ```bash
@@ -61,7 +66,7 @@ python -m lab_lens evaluate --model outputs/best.pt
 ## CLI Usage
 ```bash
 python -m lab_lens quality --input path/to/image.jpg
-python -m lab_lens audit-dataset-pairs --dataset Dataset/ChemEq25
+python -m lab_lens audit-dataset-pairs --dataset Dataset/ChemEq25_figshare
 python -m lab_lens analyze --input path/to/image.jpg --config configs/lab_setup.yaml
 ```
 
@@ -92,7 +97,7 @@ pytest tests/
 - Real-time video feed verification.
 
 ## Dataset Citation
-ChemEq25 Dataset Version 5. Mendeley Data. https://data.mendeley.com/datasets/zptphkynt6/5
+ChemEq25: Chemistry Lab Image Dataset Covering 25 Apparatus Categories. Figshare. https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433
 
 ## License
 [Add License Here]

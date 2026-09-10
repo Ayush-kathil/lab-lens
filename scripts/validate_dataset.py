@@ -1,114 +1,181 @@
 import argparse
+import yaml
 import json
+import math
 from pathlib import Path
-
-def clean_stem(filename: str) -> str:
-    """
-    Cleans the stem to handle Roboflow formats or 8.3 short names if possible.
-    Actually, to avoid guessing Windows 8.3 mismatches, we use a basic prefix match or just return the stem.
-    Given the constraints, we strip out extensions and normalize to upper case.
-    We also remove '_jpg.rf.*' hashes to match original names.
-    """
-    stem = Path(filename).stem.upper()
-    if "_JPG.RF" in stem:
-        stem = stem.split("_JPG.RF")[0]
-    return stem
+from collections import defaultdict
+import csv
 
 def validate(dataset_dir: str):
-    dataset_path = Path(dataset_dir)
-    if not dataset_path.exists():
-        print(f"Error: Dataset path {dataset_path} does not exist.")
+    dataset_root = Path(dataset_dir).resolve()
+    if not dataset_root.exists():
+        print(f"Error: Dataset path {dataset_root} does not exist.")
         return
 
+    # Find data.yaml
+    data_yaml_paths = list(dataset_root.rglob("data.yaml"))
+    if not data_yaml_paths:
+        print(f"Error: data.yaml not found inside {dataset_root}")
+        return
+        
+    data_yaml_path = data_yaml_paths[0]
+    actual_root = data_yaml_path.parent
+    print(f"Actual Dataset Root: {actual_root}")
+    
+    with open(data_yaml_path, 'r') as f:
+        data_yaml = yaml.safe_load(f)
+        
+    # Read classes
+    num_classes = data_yaml.get('nc', 0)
+    class_names = data_yaml.get('names', [])
+    if num_classes != len(class_names):
+        print("Warning: 'nc' does not match length of 'names' array in data.yaml")
+        
+    print(f"Total Classes in YAML: {num_classes}")
+    
+    # Try find Metadata.csv
+    metadata_csv_path = actual_root / "Metadata.csv"
+    has_metadata = metadata_csv_path.exists()
+    print(f"Metadata.csv present: {has_metadata}")
+    
     splits = ['train', 'valid', 'test']
     
-    overall_status = "PASS"
-    total_imgs = 0
-    total_lbls = 0
-    class_distribution = {}
-
+    overall_status = "SAFE_FOR_TRAINING"
+    stats = {
+        'total_images': 0,
+        'total_labels': 0,
+        'total_empty_labels': 0,
+        'total_invalid_annotations': 0,
+        'total_paired': 0,
+        'total_orphan_images': 0,
+        'total_orphan_labels': 0,
+        'total_instances': 0
+    }
+    
+    class_distribution = {split: defaultdict(int) for split in splits}
+    class_distribution['total'] = defaultdict(int)
+    
+    invalid_files = []
+    
     for split in splits:
-        print(f"\nSplit:\n{split}")
-        split_path = dataset_path / split
-        img_dir = split_path / 'images'
-        lbl_dir = split_path / 'labels'
+        print(f"\n--- Split: {split} ---")
+        
+        # Read from yaml if possible
+        yaml_split_key = split if split != 'valid' else 'val'
+        split_rel = data_yaml.get(yaml_split_key, split)
+        
+        if isinstance(split_rel, str) and 'images' in split_rel:
+            proposed_path = (actual_root / Path(split_rel).parent).resolve()
+            if not proposed_path.exists():
+                # Fallback if Roboflow generated relative paths incorrectly
+                proposed_path = actual_root / split
+            split_dir = proposed_path
+        else:
+            split_dir = actual_root / split
+            
+        img_dir = split_dir / 'images'
+        lbl_dir = split_dir / 'labels'
         
         if not img_dir.exists() or not lbl_dir.exists():
-            print(f"  Missing images or labels directory.")
-            overall_status = "FAIL"
+            print(f"  Missing images or labels directory: {img_dir} | {lbl_dir}")
+            overall_status = "NOT_SAFE_FOR_TRAINING"
             continue
             
-        images = list(img_dir.iterdir())
-        labels = list(lbl_dir.iterdir())
+        images = {f.stem: f for f in img_dir.iterdir() if f.is_file()}
+        labels = {f.stem: f for f in lbl_dir.iterdir() if f.is_file()}
         
-        print(f"images: {len(images)}")
-        print(f"labels: {len(labels)}")
+        paired = set(images.keys()).intersection(set(labels.keys()))
+        orphan_images = set(images.keys()) - set(labels.keys())
+        orphan_labels = set(labels.keys()) - set(images.keys())
         
-        total_imgs += len(images)
-        total_lbls += len(labels)
+        split_invalid = 0
+        split_empty = 0
+        split_instances = 0
         
-        # Simple count mismatch logic
-        # Due to 8.3 filename truncation on some filesystems, exact string matching might fail.
-        # We will report orphan counts based on the exact numbers if we can't reliably map them.
-        # But we must find the exact orphan if there's exactly 1.
-        
-        img_stems = {clean_stem(f.name): f for f in images}
-        lbl_stems = {clean_stem(f.name): f for f in labels}
-        
-        orphan_images = set(img_stems.keys()) - set(lbl_stems.keys())
-        orphan_labels = set(lbl_stems.keys()) - set(img_stems.keys())
-        
-        # If the number of stems matches the number of files minus the exact discrepancy,
-        # we try to report the raw discrepancy.
-        orphan_img_files = [img_stems[s].name for s in orphan_images]
-        orphan_lbl_files = [lbl_stems[s].name for s in orphan_labels]
-        
-        invalid_annotations = 0
-        
-        for lbl_file in labels:
-            if lbl_file.stat().st_size == 0:
-                invalid_annotations += 1
+        for stem, f_path in labels.items():
+            if f_path.stat().st_size == 0:
+                split_empty += 1
                 continue
                 
-            try:
-                with open(lbl_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        parts = line.strip().split()
-                        if len(parts) != 5:
-                            invalid_annotations += 1
-                            break
-                        cls_id, x, y, w, h = parts
-                        cls_id = int(cls_id)
-                        x, y, w, h = float(x), float(y), float(w), float(h)
+            is_invalid = False
+            error_reason = ""
+            with open(f_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    parts = line.strip().split()
+                    if not parts:
+                        continue
+                    if len(parts) != 5:
+                        is_invalid = True
+                        error_reason = "wrong_number_of_fields"
+                        break
                         
-                        if not (0 <= cls_id <= 24):
-                            invalid_annotations += 1
-                            break
-                        if not (0 <= x <= 1 and 0 <= y <= 1 and 0 < w <= 1 and 0 < h <= 1):
-                            invalid_annotations += 1
-                            break
+                    try:
+                        cls_id = int(parts[0])
+                        x, y, w, h = float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])
                         
-                        class_distribution[cls_id] = class_distribution.get(cls_id, 0) + 1
-            except Exception:
-                invalid_annotations += 1
-
-        print(f"orphan images: {len(orphan_images)}")
-        print(f"orphan labels: {len(orphan_labels)}")
-        print(f"invalid annotations: {invalid_annotations}")
+                        if math.isnan(x) or math.isnan(y) or math.isnan(w) or math.isnan(h) or math.isinf(x) or math.isinf(y):
+                            is_invalid = True
+                            error_reason = "nan_or_inf"
+                            break
+                            
+                        if not (0 <= cls_id < num_classes):
+                            is_invalid = True
+                            error_reason = "class_id_out_of_range"
+                            break
+                            
+                        if not (0 <= x <= 1 and 0 <= y <= 1):
+                            is_invalid = True
+                            error_reason = "coords_out_of_bounds"
+                            break
+                            
+                        if not (0 < w <= 1 and 0 < h <= 1):
+                            is_invalid = True
+                            error_reason = "dimensions_invalid"
+                            break
+                            
+                        class_distribution[split][cls_id] += 1
+                        class_distribution['total'][cls_id] += 1
+                        split_instances += 1
+                        
+                    except ValueError:
+                        is_invalid = True
+                        error_reason = "non_numeric_values"
+                        break
+                        
+            if is_invalid:
+                split_invalid += 1
+                invalid_files.append({"file": f_path.name, "split": split, "error": error_reason, "action": "EXCLUDE"})
+                
+        print(f"Images: {len(images)}")
+        print(f"Labels: {len(labels)}")
+        print(f"Paired: {len(paired)}")
+        print(f"Orphan Images: {len(orphan_images)}")
+        print(f"Orphan Labels: {len(orphan_labels)}")
+        print(f"Empty Labels (Negatives): {split_empty}")
+        print(f"Invalid Annotations: {split_invalid}")
+        
+        stats['total_images'] += len(images)
+        stats['total_labels'] += len(labels)
+        stats['total_paired'] += len(paired)
+        stats['total_orphan_images'] += len(orphan_images)
+        stats['total_orphan_labels'] += len(orphan_labels)
+        stats['total_empty_labels'] += split_empty
+        stats['total_invalid_annotations'] += split_invalid
+        stats['total_instances'] += split_instances
         
         if len(orphan_images) > 0 or len(orphan_labels) > 0:
-            if overall_status == "PASS":
-                overall_status = "WARN"
-                
-        if invalid_annotations > 0:
-            overall_status = "FAIL"
+            overall_status = "NOT_SAFE_FOR_TRAINING"
 
-    print("\nOVERALL DATASET STATUS:")
-    print(overall_status)
+    print("\n--- Summary Statistics ---")
+    for k, v in stats.items():
+        print(f"{k}: {v}")
+        
+    print(f"\nFinal Readiness Decision: {overall_status}")
     
-    print("\nClass Distribution (Instances):")
-    for k in sorted(class_distribution.keys()):
-        print(f"Class {k}: {class_distribution[k]}")
+    if invalid_files:
+        print("\nInvalid Annotation Policy:")
+        for inv in invalid_files:
+            print(f"- {inv['split']}/{inv['file']}: {inv['error']} -> Action: {inv['action']}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
