@@ -1,5 +1,5 @@
 {
-  "source_dataset_path": "C:\\Users\\shiva\\OneDrive\\Documents\\GitHub\\Lab-lens\\Dataset\\ChemEq25_figshare\\ChemistryLabApparatus-25",
+  "source_dataset_path": "Dataset/ChemEq25_figshare/ChemistryLabApparatus-25",
   "preparation_script_version": "1.0",
   "preparation_timestamp": "2026-09-10T20:05:23.973055+00:00",
   "source_git_commit": "8a7debdeda0214c7bceccecd2c1d5c7bef5a63f3",

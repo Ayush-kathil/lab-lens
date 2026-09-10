@@ -34,15 +34,15 @@ The image and its annotation are an inseparable pair. 59 annotations contained i
 - **Total Images:** 4,599 (Train: 3,220, Valid: 920, Test: 459)
 
 ## 9. Final Dataset Counts
-- **Total Images:** 4,491
-- **Train:** 3,115
-- **Valid:** 917
-- **Test:** 459
+- **Total Images:** 4,458
+- **Train:** 3,103
+- **Valid:** 900
+- **Test:** 455
 
 ## 10. Number of Removed / Reassigned Samples
-- **Duplicate Images Removed:** 49
+- **Duplicate Images Removed:** 82
 - **Malformed Annotations Excluded:** 59
-*(Total reduction: 108 images from the original 4,599 -> 4,491 final samples)*
+*(Total reduction: 141 images from the original 4,599 -> 4,458 final samples)*
 
 ## 11. Verification Results
 An independent verification hash script (`verify_training_dataset.py`) proved:
