@@ -1,0 +1,28 @@
+{
+  "dataset_name": "ChemEq25",
+  "source": "Figshare",
+  "source_url": "https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433",
+  "local_path": "Dataset/ChemEq25_figshare",
+  "version": "9",
+  "license": "CC BY 4.0",
+  "class_count": 25,
+  "class_names": [
+    "Beaker", "Buchner_Funnel", "Burette_Stands", "Calorimeter", "Conical_Flask", "Funnel", "Glass_Rod", 
+    "Measuring_Cylinder", "Mechanical_Balance_Scale", "Nessler_Reagent_Bottle", "Pipette", "Porcelain_Mortar Pestle", 
+    "Precision_Weight_Scale", "Reagent_Bottle", "Round_Bottom_Flask_Borosilicate_Glass_1_Neck", 
+    "Round_Bottom_Flask_Borosilicate_Glass_2_Neck", "Round_Bottom_Flask_Borosilicate_Glass_3_Neck", 
+    "Separating_Funnel", "Spirit_Lamp", "TestTube_Holder", "Test_Tube", "Volumetric_Flask", "Volumetric_Pipet", 
+    "Wash_Bottle", "Weighing_Bottle"
+  ],
+  "train_count": 3220,
+  "validation_count": 920,
+  "test_count": 459,
+  "total_count": 4599,
+  "label_count": 4599,
+  "instance_count": 6801,
+  "empty_labels": 6,
+  "invalid_annotations": 59,
+  "orphan_images": 0,
+  "orphan_labels": 0,
+  "validation_timestamp": "2026-09-11T01:27:00Z"
+}
