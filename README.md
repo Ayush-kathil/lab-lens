@@ -11,12 +11,13 @@ Manual verification of laboratory setups is error-prone and time-consuming. Inco
 This project serves as a serious academic and portfolio-grade engineering endeavor. It demonstrates the ability to build a robust, production-quality machine learning system that goes beyond a simple YOLO demo by incorporating spatial verification and explainable compliance reporting.
 
 ## Key Features
-- **Image Quality Analysis**: Assesses input images for blur, lighting, and resolution.
-- **Perspective Correction**: Optionally aligns images using homography and feature matching.
-- **Object Detection**: Identifies 25 categories of lab apparatus using a lightweight model.
-- **Spatial Reasoning**: Verifies if equipment is placed in the correct normalized workspace regions.
-- **Compliance Scoring**: Computes an explainable score based on missing, misplaced, or extra equipment.
-- **Report Generation**: Outputs JSON, Markdown, and annotated images.
+- **Image Quality Analysis** (Implemented): Assesses input images for blur, lighting, and resolution.
+- **Dataset Validation & Repair** (Implemented): Mathematically validates and repairs cross-split leakage.
+- **Object Detection** (Planned / Foundation built): Identifies 25 categories of lab apparatus.
+- **Perspective Correction** (Planned): Optionally aligns images using homography and feature matching.
+- **Spatial Reasoning** (Planned): Verifies if equipment is placed in the correct normalized workspace regions.
+- **Compliance Scoring** (Planned): Computes an explainable score based on missing, misplaced, or extra equipment.
+- **Report Generation** (Planned): Outputs JSON, Markdown, and annotated images.
 
 ## Architecture
 Lab Lens is built with a modular Python architecture. Key boundaries include:
@@ -53,14 +54,15 @@ pip install -r requirements.txt
 2. Place it in `Dataset/ChemEq25_figshare/` at the project root and extract the `.rar` file inside it.
 3. Validate: `python -m lab_lens validate-dataset --dataset Dataset/ChemEq25_figshare`
 
-## Training
+## Training (Planned / Scaffolded)
+The training interface is scaffolded. Real training will be implemented in a future phase.
 ```bash
-python -m lab_lens train --config configs/default.yaml
+python -m lab_lens train --dataset Dataset/ChemEq25_training --config configs/training.yaml --dry-run
 ```
 
-## Evaluation
+## Evaluation (Planned / Scaffolded)
 ```bash
-python -m lab_lens evaluate --model outputs/best.pt
+python -m lab_lens evaluate --model outputs/best.pt --dataset Dataset/ChemEq25_training
 ```
 
 ## CLI Usage

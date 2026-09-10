@@ -1,0 +1,9 @@
+model: YOLOv8n
+dataset: Dataset/ChemEq25_training/data.yaml
+epochs: 100
+batch_size: 16
+image_size: 640
+device: 'cpu'  # Will be overridden by hardware detection if GPU is available
+seed: 42
+confidence_threshold: 0.25
+output_directory: outputs/training
