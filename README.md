@@ -1,11 +1,11 @@
-# LabCrest
+# Lab Lens
 
 Lab-Lens — Vision-Based Laboratory Equipment Verification & Spatial Compliance System.
 
-LabCrest is a modular Computer Vision system designed to analyze laboratory images, identify equipment, reason about spatial arrangements, and verify compliance against a reference setup. It calculates explainable compliance scores and generates detailed reports, ensuring safety and standard operating procedure adherence in laboratory environments.
+Lab Lens is a modular Computer Vision system designed to analyze laboratory images, identify equipment, reason about spatial arrangements, and verify compliance against a reference setup. It calculates explainable compliance scores and generates detailed reports, ensuring safety and standard operating procedure adherence in laboratory environments.
 
 ## Problem
-Manual verification of laboratory setups is error-prone and time-consuming. Incorrect setups can lead to safety hazards or failed experiments. LabCrest automates this process by applying object detection and spatial reasoning to workspace images.
+Manual verification of laboratory setups is error-prone and time-consuming. Incorrect setups can lead to safety hazards or failed experiments. Lab Lens automates this process by applying object detection and spatial reasoning to workspace images.
 
 ## Motivation
 This project serves as a serious academic and portfolio-grade engineering endeavor. It demonstrates the ability to build a robust, production-quality machine learning system that goes beyond a simple YOLO demo by incorporating spatial verification and explainable compliance reporting.
@@ -19,7 +19,7 @@ This project serves as a serious academic and portfolio-grade engineering endeav
 - **Report Generation**: Outputs JSON, Markdown, and annotated images.
 
 ## Architecture
-LabCrest is built with a modular Python architecture. Key boundaries include:
+Lab Lens is built with a modular Python architecture. Key boundaries include:
 - `preprocessing/`: Quality checks and image enhancements.
 - `detection/`: Abstracted object detection interface.
 - `spatial/`: Region logic and workspace verification.
@@ -46,21 +46,21 @@ pip install -r requirements.txt
 ## Dataset Setup
 1. Download ChemEq25 from Mendeley Data.
 2. Place it in `Dataset/ChemEq25/` at the project root.
-3. Validate: `python -m labcrest validate-dataset`
+3. Validate: `python -m Lab Lens validate-dataset`
 
 ## Training
 ```bash
-python -m labcrest train --config configs/default.yaml
+python -m Lab Lens train --config configs/default.yaml
 ```
 
 ## Evaluation
 ```bash
-python -m labcrest evaluate --model outputs/best.pt
+python -m Lab Lens evaluate --model outputs/best.pt
 ```
 
 ## CLI Usage
 ```bash
-python -m labcrest analyze --input path/to/image.jpg --config configs/lab_setup.yaml
+python -m Lab Lens analyze --input path/to/image.jpg --config configs/lab_setup.yaml
 ```
 
 ## Example Output
@@ -70,7 +70,7 @@ The system generates:
 - A Markdown summary explaining the compliance score and any warnings.
 
 ## Project Structure
-- `src/labcrest/`: Core application logic.
+- `src/Lab Lens/`: Core application logic.
 - `tests/`: Unit and integration tests.
 - `configs/`: YAML setup definitions.
 - `docs/`: In-depth documentation (Architecture, Algorithms, Dataset).

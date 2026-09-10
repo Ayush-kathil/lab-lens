@@ -1,4 +1,4 @@
-# LabCrest Project Statement
+# Lab Lens Project Statement
 
 ## Problem Statement
 In laboratory environments, ensuring the correct setup of equipment is crucial for safety, experimental accuracy, and compliance with standard operating procedures. Manual verification is error-prone, time-consuming, and difficult to standardize. There is a need for an automated system that can analyze a laboratory workspace, identify the equipment present, and verify its spatial arrangement against a reference configuration.
@@ -9,7 +9,7 @@ In laboratory environments, ensuring the correct setup of equipment is crucial f
 - **Safety Inspectors**: For auditing laboratory compliance.
 
 ## Scope
-LabCrest is a Vision-Based Laboratory Equipment Verification & Spatial Compliance System. It takes an image of a lab workspace, detects standard laboratory apparatus, analyzes their spatial distribution, and scores the setup based on a provided configuration file. 
+Lab Lens is a Vision-Based Laboratory Equipment Verification & Spatial Compliance System. It takes an image of a lab workspace, detects standard laboratory apparatus, analyzes their spatial distribution, and scores the setup based on a provided configuration file. 
 The system focuses on common chemistry lab apparatus (e.g., beakers, flasks, pipettes) using the ChemEq25 dataset for object detection training.
 
 ## Objectives
@@ -44,7 +44,7 @@ The system focuses on common chemistry lab apparatus (e.g., beakers, flasks, pip
 - System must be installable via standard Python tools (`pip`, `requirements.txt`).
 
 ## Expected Outcomes
-- A complete, testable software package (`labcrest`).
+- A complete, testable software package (`Lab Lens`).
 - A trained object detection model (or clear instructions and scripts to train it).
 - Comprehensive documentation, including architectural diagrams and algorithm explanations.
 - A suite of automated tests and GitHub Actions CI pipelines.

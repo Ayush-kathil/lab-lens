@@ -37,7 +37,7 @@ The `.gitignore` is configured to ignore the `Dataset/` folder at the root.
 3. Place the `ChemEq25` folder inside a `Dataset` directory at the project root.
 4. Run the validation script to ensure data integrity:
    ```bash
-   python -m labcrest validate-dataset
+   python -m Lab Lens validate-dataset
    ```
 
 ### Custom Evaluation Data

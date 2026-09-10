@@ -57,7 +57,7 @@ The following 25 classes are annotated in this dataset:
 25. Weighing_Bottle
 
 ## Intended Use
-This dataset is strictly used for training and evaluating the **Object Detection** module of LabCrest. 
+This dataset is strictly used for training and evaluating the **Object Detection** module of Lab Lens. 
 It provides the bounding boxes to detect WHAT apparatus is present.
 
 ## Limitations

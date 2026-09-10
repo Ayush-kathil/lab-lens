@@ -40,7 +40,12 @@ A file count on the directories produced the following actual figures:
 | Test   | 458    | 459    |
 | **Total** | **4,598** | **4,599** |
 
-*Note: There is a discrepancy of 1 file in the test set (458 images vs 459 labels), which must be handled during data loading.*
+## Investigation of Count Mismatch
+An automated script was run to identify the discrepancy between the 4,598 images and 4,599 labels in the Test set.
+- A single "empty" label file `20250105_161536_jpg.rf.e3f9a0ab3f391ee4f119f4a0e984ca9a.txt` was found in the Test labels directory. It has size 0 bytes.
+- This is the orphan label causing the 1-file discrepancy (458 images vs 459 labels).
+- Note: Many filenames are physically stored using Windows 8.3 short names (e.g., `IM1A7B~1.TXT`), which obscured immediate 1-to-1 matching, but exact accounting confirms the single orphan.
+- The orphan file has NOT been deleted, and the dataset has been left unmodified as read-only.
 
 ## Classes
 The `data.yaml` defines `nc: 25` (25 classes). The actual class names found:
@@ -71,6 +76,4 @@ The `data.yaml` defines `nc: 25` (25 classes). The actual class names found:
 25. Weighing_Bottle
 
 ## Repository Status
-- The repository was not previously initialized as a Git repository.
-- There are no pre-existing code files or architectures to preserve in the current branch.
-- The raw dataset is located within the workspace and must be excluded from Git versioning to prevent repository bloat.
+- The dataset is excluded from Git tracking via `.gitignore`.

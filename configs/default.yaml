@@ -1,0 +1,4 @@
+dataset_path: "Dataset/ChemEq25"
+confidence_threshold: 0.5
+image_size: 640
+logging_level: "INFO"

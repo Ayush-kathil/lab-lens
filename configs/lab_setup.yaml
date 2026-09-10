@@ -1,0 +1,18 @@
+# Lab Lens Setup Configuration
+name: example_chemistry_lab_setup
+
+# Note: The ChemEq25 dataset provides only bounding box object detection annotations.
+# It does NOT provide spatial expectations, compliance ground truth, or regional locations.
+# The spatial expectations listed below are placeholders for evaluation on a future
+# custom setup dataset. Do not assume these are derived from ChemEq25.
+
+spatial_expectations:
+  - class_name: Beaker
+    required: true
+    expected_region: center
+    tolerance: 0.1
+
+  - class_name: Bunsen_Burner
+    required: false
+    expected_region: right
+    tolerance: 0.2
