@@ -1,0 +1,52 @@
+{
+  "source_dataset_path": "C:\\Users\\shiva\\OneDrive\\Documents\\GitHub\\Lab-lens\\Dataset\\ChemEq25_figshare\\ChemistryLabApparatus-25",
+  "preparation_script_version": "1.0",
+  "preparation_timestamp": "2026-09-10T20:05:23.973055+00:00",
+  "source_git_commit": "8a7debdeda0214c7bceccecd2c1d5c7bef5a63f3",
+  "original_counts": {
+    "train": 3220,
+    "valid": 920,
+    "test": 459
+  },
+  "final_counts": {
+    "train": 3103,
+    "valid": 900,
+    "test": 455
+  },
+  "total_final_image_count": 4458,
+  "duplicate_groups": 82,
+  "cross_split_duplicate_groups": 35,
+  "duplicate_images_removed": 82,
+  "malformed_annotations_excluded": 59,
+  "empty_labels_retained": 6,
+  "class_mapping": [
+    "Beaker",
+    "Buchner_Funnel",
+    "Burette_Stands",
+    "Calorimeter",
+    "Conical_Flask",
+    "Funnel",
+    "Glass_Rod",
+    "Measuring_Cylinder",
+    "Mechanical_Balance_Scale",
+    "Nessler_Reagent_Bottle",
+    "Pipette",
+    "Porcelain_Mortar Pestle",
+    "Precision_Weight_Scale",
+    "Reagent_Bottle",
+    "Round_Bottom_Flask_Borosilicate_Glass_1_Neck",
+    "Round_Bottom_Flask_Borosilicate_Glass_2_Neck",
+    "Round_Bottom_Flask_Borosilicate_Glass_3_Neck",
+    "Separating_Funnel",
+    "Spirit_Lamp",
+    "TestTube_Holder",
+    "Test_Tube",
+    "Volumetric_Flask",
+    "Volumetric_Pipet",
+    "Wash_Bottle",
+    "Weighing_Bottle"
+  ],
+  "deterministic_representative_selection_rule": "lexicographically smallest stem within the highest priority split",
+  "deterministic_split_priority_rule": "test > valid > train",
+  "final_per_split_hash_uniqueness_status": "verified"
+}
