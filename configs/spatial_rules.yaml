@@ -1,0 +1,31 @@
+﻿# SPATIAL CONFIGURATION SCHEMA & EXAMPLE
+# 
+# IMPORTANT: EXAMPLE / PLACEHOLDER — NOT VALIDATED AGAINST CHEMEQ25
+# 
+# ChemEq25 provides ONLY object detection boxes. It does NOT provide 
+# spatial compliance ground truth. The setup below is purely synthetic
+# for testing the deterministic spatial reasoning engine.
+
+setup_name: synthetic_example_setup
+
+image_coordinate_convention: "normalized_xyxy"
+
+regions:
+  work_zone:
+    x1: 0.1
+    y1: 0.1
+    x2: 0.9
+    y2: 0.9
+
+required_objects:
+  Beaker: 1
+  Bunsen_Burner: 1  # Note: May not be a real class in the 25-class map
+
+spatial_rules:
+  - rule_type: inside
+    subject_class: Beaker
+    target: work_zone
+    threshold: 0.8
+  - rule_type: left_of
+    subject_class: Bunsen_Burner
+    target: Beaker
