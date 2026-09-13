@@ -1,7 +1,7 @@
 # Experimental 3-Epoch CPU Baseline
 
-**Date/Time:** 2026-09-11
-**Git Commit SHA:** 9b76e6d
+**Date/Time:** 2026-09-12
+**Git Commit SHA:** e4fcfb0
 **Model:** YOLOv8n
 **Dataset Path:** Dataset/ChemEq25_training/data.yaml
 
@@ -33,36 +33,46 @@
 3 epochs was selected as an operational CPU-constrained experimental baseline, not as a convergence target. The pre-flight analysis demonstrated that 100 epochs would consume approximately 26 continuous hours on this CPU-only environment.
 
 ## F. Actual training duration
-- **Duration per epoch:** ~13 minutes 19 seconds (Epoch 1)
-- **Validation duration:** ~1 minute 22 seconds
-- **Total duration:** Run aborted prematurely after Epoch 1 validation.
+- **Epoch 1 Duration:** 23m 42s training, 1m 49s validation
+- **Epoch 2 Duration:** 20m 11s training, 2m 01s validation
+- **Total duration:** Run aborted prematurely during Epoch 3 training (batch 135).
 
 ## G. Actual validation metrics
-*(From Epoch 1 before crash)*
+*(From Epoch 2 before crash)*
 - **Validation Images:** 900
 - **Instances:** 1360
-- **Precision (P):** 0.507
-- **Recall (R):** 0.570
-- **mAP@50:** 0.599
-- **mAP@50-95:** 0.373
+- **Precision (P):** 0.718
+- **Recall (R):** 0.794
+- **mAP@50:** 0.794
+- **mAP@50-95:** 0.521
 
 ## H. Training-loss progression
-*(Final batch of Epoch 1)*
-- **box_loss:** 1.527
-- **cls_loss:** 3.837
-- **dfl_loss:** 1.690
+*(Final batch of Epoch 2)*
+- **box_loss:** 1.321
+- **cls_loss:** 2.404
+- **dfl_loss:** 1.511
 
 ## I. Known limitations (Run Failure)
-The training run failed at the conclusion of Epoch 1 validation. 
-- **Exact Exception:** `Error during training: No module named 'polars'`
-- **Cause:** Ultralytics `8.4.146` requires the `polars` library to generate metric plots during validation. Because `ultralytics` was installed with `--no-deps` to avoid the massive `polars_runtime` download hanging the environment, the plotting logic threw an `ImportError`, crashing the training loop before Epoch 2 could commence.
-- **Local Artifact Path:** `C:\Users\shiva\OneDrive\Documents\GitHub\Lab-lens\runs\detect\outputs\baseline_training` (Intentionally kept outside Git via `.gitignore`).
+The training run failed during Epoch 3.
+- **Exact Exception:** `Error during training: [enforce fail at alloc_cpu.cpp:117] data. DefaultCPUAllocator: not enough memory: you tried to allocate 6553600 bytes.`
+- **Cause:** System Out-Of-Memory (OOM) error. The OS RAM was exhausted by continuous CPU training spanning ~50 minutes, likely due to memory leaks in the dataloader running with `workers: 0` or PyTorch tensor accumulations.
+- **Local Artifact Path:** `C:\Users\shiva\OneDrive\Documents\GitHub\Lab-lens\runs\detect\outputs\baseline_training-3`
 
 ## J. Statement on Convergence
 This is NOT a converged benchmark. It serves purely as an experimental mechanical verification of the pipeline.
 
 ## K. Statement on Test Split
 The 455-image test split remains absolutely untouched. No metrics were derived from it, and it did not influence any hyperparameter or checkpoint decisions.
+
+---
+### Historical Data: Experimental Baseline Attempt 1 — Epoch 1
+- **Date/Time:** 2026-09-11
+- **Subset Definition:** Full dataset (fraction 1.0)
+- **Epoch 1 Training Loss:** box: 1.527, cls: 3.837, dfl: 1.690
+- **Epoch 1 Validation:** P: 0.507, R: 0.570, mAP@50: 0.599, mAP@50-95: 0.373 (Duration: ~13m 19s train / ~1m 22s val)
+- **Failure:** Run aborted prematurely after Epoch 1 validation.
+- **Cause:** `Error during training: No module named 'polars'`. Ultralytics plotting hook crashed because the environment lacked the `polars` dependency.
+- **Remediation:** Installed `polars` successfully via pip.
 
 ---
 ### Historical Data: Pipeline Smoke/Diagnostic Training Run (5% Fraction)
