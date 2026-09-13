@@ -1,4 +1,4 @@
-﻿import argparse
+import argparse
 import sys
 from pathlib import Path
 
@@ -26,7 +26,7 @@ def main():
     print("========================================")
     print(f"Total Samples Tested : {report.total_samples}")
     print(f"Exact Matches        : {report.exact_matches}")
-    print(f"Compliance Accuracy  : {report.compliance_accuracy * 100:.2f}%")
+    print(f"Synthetic Fixture Exact-Match Accuracy  : {report.compliance_accuracy * 100:.2f}%")
     
     if report.incorrect_samples:
         print("\n--- Failed Samples ---")

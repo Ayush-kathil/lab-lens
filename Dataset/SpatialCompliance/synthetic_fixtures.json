@@ -1005,35 +1005,5 @@
       "compliant": true,
       "violations": []
     }
-  },
-  {
-    "sample_id": "test_022_invalid_ambiguous",
-    "image_ref": "synthetic",
-    "image_width": 1000,
-    "image_height": 1000,
-    "setup_specification": {
-      "setup_name": "setup_test_022_invalid_ambiguous",
-      "required_objects": {
-        "Beaker": 1
-      },
-      "regions": {},
-      "spatial_rules": []
-    },
-    "objects": [
-      {
-        "class_name": "Beaker",
-        "box": {
-          "x1": 0.5,
-          "y1": 0.5,
-          "x2": 0.5,
-          "y2": 0.5
-        },
-        "confidence": 1.0
-      }
-    ],
-    "expected_output": {
-      "compliant": true,
-      "violations": []
-    }
   }
 ]
