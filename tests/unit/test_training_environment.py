@@ -20,8 +20,8 @@ def test_train_cli_smoke_test_mode(tmp_path):
     assert result.returncode != 0  # Should fail since paths don't exist, but argument is accepted.
 
 def test_invalid_training_configuration():
-    # Calling the actual script with invalid paths
-    result = subprocess.run(["python", "scripts/train_detector.py", "--dataset", "invalid_dir", "--config", "invalid_cfg.yaml", "--dry-run"], capture_output=True, text=True)
+    import sys
+    result = subprocess.run([sys.executable, "scripts/train_detector.py", "--dataset", "invalid_dir", "--config", "invalid_cfg.yaml", "--dry-run"], capture_output=True, text=True)
     assert result.returncode == 1
     assert "Error: Configuration file not found" in result.stdout
 
