@@ -1,0 +1,61 @@
+[
+  {
+    "sample_id": "rw_001_compliant",
+    "session_id": "setup_001",
+    "split": "train",
+    "annotation_status": "ACCEPTED",
+    "image_metadata": { "filename": "img1.jpg", "width": 1920, "height": 1080, "viewpoint": "front" },
+    "objects": [
+      { "object_id": "b1", "class_name": "Beaker", "box": {"x1": 0.1, "y1": 0.1, "x2": 0.3, "y2": 0.3} }
+    ],
+    "setup_specification": {
+      "setup_name": "setup1",
+      "required_objects": {"Beaker": 1},
+      "regions": {"zone1": {"x1": 0.0, "y1": 0.0, "x2": 0.5, "y2": 0.5}},
+      "spatial_rules": [
+        {"rule_type": "inside", "subject_id": "b1", "target": "zone1"}
+      ]
+    },
+    "ground_truth": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "rw_002_non_compliant",
+    "session_id": "setup_002",
+    "split": "validation",
+    "annotation_status": "ACCEPTED",
+    "image_metadata": { "filename": "img2.jpg", "width": 1920, "height": 1080, "viewpoint": "front" },
+    "objects": [
+      { "object_id": "b1", "class_name": "Beaker", "box": {"x1": 0.6, "y1": 0.6, "x2": 0.8, "y2": 0.8} }
+    ],
+    "setup_specification": {
+      "setup_name": "setup1",
+      "required_objects": {"Beaker": 1},
+      "regions": {"zone1": {"x1": 0.0, "y1": 0.0, "x2": 0.5, "y2": 0.5}},
+      "spatial_rules": [
+        {"rule_type": "inside", "subject_id": "b1", "target": "zone1"}
+      ]
+    },
+    "ground_truth": {
+      "compliant": false,
+      "violations": [{"type": "MISPLACED_OBJECT"}]
+    }
+  },
+  {
+    "sample_id": "rw_003_ambiguous",
+    "session_id": "setup_003",
+    "split": "unassigned",
+    "annotation_status": "AMBIGUOUS",
+    "image_metadata": { "filename": "img3.jpg", "width": 1920, "height": 1080, "viewpoint": "top" },
+    "objects": [],
+    "setup_specification": {
+      "setup_name": "setup1",
+      "required_objects": {"Beaker": 1},
+      "regions": {},
+      "spatial_rules": []
+    },
+    "ground_truth": {}
+  }
+]
