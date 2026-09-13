@@ -65,6 +65,17 @@ def main():
     parser.add_argument('--config', required=True, help="Path to training configuration yaml")
     parser.add_argument('--dry-run', action='store_true', help="Print configuration without training")
     parser.add_argument('--smoke-test', action='store_true', help="Run a 1-epoch tiny training run")
+    parser.add_argument('--telemetry', action='store_true', help="Enable memory telemetry")
+    
+    # Diagnostic Overrides
+    parser.add_argument('--no-plots', action='store_true')
+    parser.add_argument('--no-val', action='store_true')
+    parser.add_argument('--no-save', action='store_true')
+    parser.add_argument('--cache', action='store_true')
+    parser.add_argument('--batch-override', type=int, default=None)
+    parser.add_argument('--epochs-override', type=int, default=None)
+    parser.add_argument('--fraction-override', type=float, default=None)
+
     args = parser.parse_args()
 
     config = validate_config(args.config)
@@ -102,8 +113,8 @@ def main():
     data_yaml_path = Path(args.dataset) / "data.yaml"
     model_name = config.get('model', 'yolov8n.pt')
     
-    epochs = config.get('epochs', 1)
-    batch = config.get('batch_size', 16)
+    epochs = args.epochs_override if args.epochs_override is not None else config.get('epochs', 1)
+    batch = args.batch_override if args.batch_override is not None else config.get('batch_size', 16)
     imgsz = config.get('image_size', 640)
     name = config.get('name', 'baseline_training')
     
@@ -119,8 +130,24 @@ def main():
     import ultralytics
     model = YOLO(model_name)
     
+    telemetry = None
+    if args.telemetry:
+        sys.path.append(str(Path(__file__).parent.resolve()))
+        try:
+            from telemetry import MemoryTelemetry
+            run_dir = Path(config.get('project', 'outputs')) / name
+            telemetry = MemoryTelemetry(run_dir)
+            telemetry.record("process_start")
+            telemetry.attach(model)
+            print(f"Memory telemetry attached. Logging to {telemetry.csv_path}")
+        except Exception as e:
+            print(f"Warning: Failed to attach telemetry: {e}")
+    
     print("\nStarting training...")
     try:
+        if telemetry:
+            telemetry.record("before_model_train")
+            
         results = model.train(
             data=str(data_yaml_path.resolve()),
             epochs=epochs,
@@ -131,14 +158,22 @@ def main():
             deterministic=config.get('deterministic', True),
             project=config.get('project', 'outputs'),
             name=name,
-            workers=config.get('workers', 4),
-            fraction=config.get('fraction', 1.0),
-            val=True
+            workers=config.get('workers', 0),
+            fraction=args.fraction_override if args.fraction_override is not None else config.get('fraction', 1.0),
+            val=not args.no_val,
+            plots=not args.no_plots,
+            save=not args.no_save,
+            cache=args.cache
         )
         print("\nTraining completed successfully.")
     except Exception as e:
+        if telemetry:
+            telemetry.record("exception_oom_path")
         print(f"\nError during training: {e}")
         sys.exit(1)
+    finally:
+        if telemetry:
+            telemetry.record("process_exit")
 
 if __name__ == '__main__':
     main()
