@@ -8,5 +8,5 @@ seed: 42
 deterministic: True
 confidence_threshold: 0.25
 project: outputs
-name: baseline_training
+name: baseline_training_final
 workers: 0

@@ -1,83 +1,74 @@
-# Experimental 3-Epoch CPU Baseline
+﻿# BASELINE TRAINING REPORT
 
-**Date/Time:** 2026-09-12
-**Git Commit SHA:** e4fcfb0
-**Model:** YOLOv8n
-**Dataset Path:** Dataset/ChemEq25_training/data.yaml
+## 1. Git SHA
+- **HEAD / origin/main**: f17c5a0
 
-## A. Environment
-- **Python:** 3.12.10
-- **PyTorch:** 2.12.0+cpu
-- **Ultralytics:** 8.4.146
-- **Torchvision:** 0.27.0
-- **Hardware:** Windows 11 CPU (Intel Core Ultra 5 125H)
+## 2. Environment
+- **Python**: 3.12.14 AMD64
+- **OS**: Windows-11-10.0.26200-SP0 (CPU-only)
+- **torch**: 2.2.0+cpu
+- **torchvision**: 0.17.0+cpu
+- **ultralytics**: 8.4.150
+- **numpy**: 1.26.4
+- **Total RAM**: ~15.61 GB
 
-## B. Dataset
-- **Train:** 3,103 images
-- **Valid:** 900 images
-- **Test:** 455 images (Explicitly untouched and protected)
+## 3. Dataset counts
+- **Train images**: 3103
+- **Validation images**: 900
+- **Test images**: 455
 
-## C. Model
-- **Architecture:** YOLOv8n.pt (Nano)
+## 4. Model
+- **Architecture**: YOLOv8n
 
-## D. Configuration
-- **Fraction:** 1.0 (Full training split)
-- **Epochs:** 3
-- **Batch Size:** 16
-- **Image Size:** 640
-- **Device:** cpu
-- **Workers:** 0 (Required to prevent Windows CPU dataloader freezing)
-- **Seed:** 42
+## 5. Exact configuration
+- **Batch size**: 8
+- **Epochs**: 3
+- **Image size (imgsz)**: 640
+- **Workers**: 0
+- **Cache**: False
+- **Fraction**: 1.0
+- **Seed**: 42
+- **Device**: cpu
 
-## E. Why 3 epochs were selected
-3 epochs was selected as an operational CPU-constrained experimental baseline, not as a convergence target. The pre-flight analysis demonstrated that 100 epochs would consume approximately 26 continuous hours on this CPU-only environment.
+## 6. Run identifier
+- outputs/baseline_training_final
 
-## F. Actual training duration
-- **Epoch 1 Duration:** 23m 42s training, 1m 49s validation
-- **Epoch 2 Duration:** 20m 11s training, 2m 01s validation
-- **Total duration:** Run aborted prematurely during Epoch 3 training (batch 135).
+## 7. Epoch 1 metrics
+- **Train Loss (Box, Cls, DFL)**: 1.5199, 3.7786, 1.6960
+- **Validation Metrics**: P: 0.54864, R: 0.61763, mAP50: 0.61676, mAP50-95: 0.38567
 
-## G. Actual validation metrics
-*(From Epoch 2 before crash)*
-- **Validation Images:** 900
-- **Instances:** 1360
-- **Precision (P):** 0.718
-- **Recall (R):** 0.794
-- **mAP@50:** 0.794
-- **mAP@50-95:** 0.521
+## 8. Epoch 2 metrics
+- **Train Loss (Box, Cls, DFL)**: 1.3345, 2.4637, 1.5275
+- **Validation Metrics**: P: 0.75032, R: 0.79052, mAP50: 0.81954, mAP50-95: 0.53676
 
-## H. Training-loss progression
-*(Final batch of Epoch 2)*
-- **box_loss:** 1.321
-- **cls_loss:** 2.404
-- **dfl_loss:** 1.511
+## 9. Epoch 3 metrics
+- **Train Loss (Box, Cls, DFL)**: 1.2766, 2.0410, 1.4617
+- **Validation Metrics**: P: 0.86165, R: 0.85265, mAP50: 0.89721, mAP50-95: 0.6117
 
-## I. Known limitations (Run Failure)
-The training run failed during Epoch 3.
-- **Exact Exception:** `Error during training: [enforce fail at alloc_cpu.cpp:117] data. DefaultCPUAllocator: not enough memory: you tried to allocate 6553600 bytes.`
-- **Cause:** System Out-Of-Memory (OOM) error. The OS RAM was exhausted by continuous CPU training spanning ~50 minutes, likely due to memory leaks in the dataloader running with `workers: 0` or PyTorch tensor accumulations.
-- **Local Artifact Path:** `C:\Users\shiva\OneDrive\Documents\GitHub\Lab-lens\runs\detect\outputs\baseline_training-3`
+## 10. Training duration
+- ~62 minutes total execution time (1.034 hours) for 3 complete epochs.
 
-## J. Statement on Convergence
-This is NOT a converged benchmark. It serves purely as an experimental mechanical verification of the pipeline.
+## 11. Validation duration
+- ~1.6 minutes per epoch.
 
-## K. Statement on Test Split
-The 455-image test split remains absolutely untouched. No metrics were derived from it, and it did not influence any hyperparameter or checkpoint decisions.
+## 12. Peak RSS
+- **Peak RSS**: 2441.56 MB (Batch 180 of Epoch 0)
 
----
-### Historical Data: Experimental Baseline Attempt 1 — Epoch 1
-- **Date/Time:** 2026-09-11
-- **Subset Definition:** Full dataset (fraction 1.0)
-- **Epoch 1 Training Loss:** box: 1.527, cls: 3.837, dfl: 1.690
-- **Epoch 1 Validation:** P: 0.507, R: 0.570, mAP@50: 0.599, mAP@50-95: 0.373 (Duration: ~13m 19s train / ~1m 22s val)
-- **Failure:** Run aborted prematurely after Epoch 1 validation.
-- **Cause:** `Error during training: No module named 'polars'`. Ultralytics plotting hook crashed because the environment lacked the `polars` dependency.
-- **Remediation:** Installed `polars` successfully via pip.
+## 13. Memory trend
+- **Process RSS remained bounded and stable** over the observed training interval. It quickly climbed to ~2.4 GB during Epoch 0 and stayed consistently flat throughout Epoch 1, Epoch 2, and Epoch 3.
 
----
-### Historical Data: Pipeline Smoke/Diagnostic Training Run (5% Fraction)
-*(Previous run logs preserved)*
-- **Date/Time:** 2026-09-11 (Commit: 0bc52d8)
-- **Subset Definition:** 5% fraction (155 training images) due to CPU constraints
-- **Duration:** ~45 seconds for 1 epoch on 5% fraction (10 batches)
-- **Validation Metrics:** N/A (Validation step crashed due to missing torchvision C++ ops)
+## 14. OOM status
+- No OOM occurred.
+
+## 15. Whether external interruption occurred
+- **No external interruption occurred** during this final 3-epoch baseline run.
+
+## 16. Artifact paths
+- uns/detect/outputs/baseline_training_final (Training artifacts, weights)
+- outputs/baseline_training_final/memory.csv (Memory telemetry)
+
+## 17. Reproducibility statement
+- The test split was not accessed. The historical atch=16 crash has been entirely bypassed by reducing batch size to 8, which establishes a stable, completely reproducible CPU training baseline.
+
+## 18. Limitations
+- atch=16 behavior still needs further root-cause isolation if larger batch sizes become strictly necessary in future experiments.
