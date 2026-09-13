@@ -14,10 +14,6 @@ class SpatialRule:
     subject_class: str
     target: str     # Can be a region name or another class name
     threshold: Optional[float] = None
-    
-    def evaluate(self, detections: List[DetectionPosition], spec: SetupSpecification) -> Tuple[bool, Optional[SpatialViolation]]:
-        # This is overridden by concrete rules or handled centrally in RuleEngine
-        pass
 
 class RuleEngine:
     def __init__(self, spec: SetupSpecification, rules: List[SpatialRule]):
@@ -37,7 +33,6 @@ class RuleEngine:
         for d in detections:
             class_counts[d.class_name] = class_counts.get(d.class_name, 0) + 1
             
-        # Check missing/extra
         for cls_name, expected in self.spec.required_objects.items():
             detected = class_counts.get(cls_name, 0)
             if detected < expected:
@@ -56,9 +51,8 @@ class RuleEngine:
             if rule.rule_type == 'inside':
                 region = self.spec.regions.get(rule.target)
                 if not region:
-                    continue # Ignore rule if region isn't defined
+                    continue
                 
-                # For every subject, it must be inside the region
                 thresh = rule.threshold if rule.threshold is not None else 0.5
                 for sub in subjects:
                     if not GeometricRelations.inside_region(sub.box, region, thresh):
@@ -67,18 +61,24 @@ class RuleEngine:
                     else:
                         satisfied.append(f"{rule.subject_class} is inside {rule.target}")
                         
-            elif rule.rule_type in ['left_of', 'right_of', 'above', 'below']:
+            elif rule.rule_type in ['left_of', 'right_of', 'above', 'below', 'overlaps', 'near', 'far']:
                 targets = [d for d in detections if d.class_name == rule.target]
                 if not subjects or not targets:
-                    continue # Can't evaluate if missing objects
+                    continue
                 
-                # Simple logic: all subjects must satisfy relation with all targets
-                # (For complex setups, would need explicit ID matching)
                 rel_func = getattr(GeometricRelations, rule.rule_type)
                 
                 for sub in subjects:
                     for tgt in targets:
-                        if not rel_func(sub.box, tgt.box):
+                        # Call with threshold if rule specifies it and function supports it
+                        kwargs = {}
+                        if rule.threshold is not None and rule.rule_type in ['overlaps', 'near', 'far', 'inside_region']:
+                            if rule.rule_type in ['near', 'far']:
+                                kwargs['distance_threshold'] = rule.threshold
+                            else:
+                                kwargs['threshold'] = rule.threshold
+
+                        if not rel_func(sub.box, tgt.box, **kwargs):
                             relation_v.append(f"{rule.subject_class} not {rule.rule_type} {rule.target}")
                             violations.append(SpatialViolation(
                                 ViolationType.SPATIAL_RELATION_VIOLATION, 

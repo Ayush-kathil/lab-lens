@@ -1,0 +1,1039 @@
+[
+  {
+    "sample_id": "test_001_compliant",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_001_compliant",
+      "required_objects": {
+        "Beaker": 1
+      },
+      "regions": {
+        "work_zone": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.9,
+          "y2": 0.9
+        }
+      },
+      "spatial_rules": [
+        {
+          "rule_type": "inside",
+          "subject_class": "Beaker",
+          "target": "work_zone",
+          "threshold": 0.8
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.4,
+          "y1": 0.4,
+          "x2": 0.6,
+          "y2": 0.6
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_002_missing",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_002_missing",
+      "required_objects": {
+        "Beaker": 1
+      },
+      "regions": {},
+      "spatial_rules": []
+    },
+    "objects": [],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "MISSING_OBJECT",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_003_extra",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_003_extra",
+      "required_objects": {
+        "Beaker": 1
+      },
+      "regions": {},
+      "spatial_rules": []
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.2,
+          "y1": 0.2,
+          "x2": 0.3,
+          "y2": 0.3
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.6,
+          "y1": 0.6,
+          "x2": 0.7,
+          "y2": 0.7
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "EXTRA_OBJECT",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_004_misplaced",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_004_misplaced",
+      "required_objects": {
+        "Beaker": 1
+      },
+      "regions": {
+        "work_zone": {
+          "x1": 0.2,
+          "y1": 0.2,
+          "x2": 0.8,
+          "y2": 0.8
+        }
+      },
+      "spatial_rules": [
+        {
+          "rule_type": "inside",
+          "subject_class": "Beaker",
+          "target": "work_zone",
+          "threshold": 0.5
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.0,
+          "y1": 0.0,
+          "x2": 0.1,
+          "y2": 0.1
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "MISPLACED_OBJECT",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_005_left_of_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_005_left_of_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "left_of",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.1,
+          "x2": 0.9,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_006_left_of_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_006_left_of_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "left_of",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.1,
+          "x2": 0.9,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_007_right_of_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_007_right_of_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "right_of",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.1,
+          "x2": 0.9,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_008_right_of_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_008_right_of_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "right_of",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.1,
+          "x2": 0.9,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_009_above_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_009_above_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "above",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.8,
+          "x2": 0.2,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_010_above_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_010_above_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "above",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.8,
+          "x2": 0.2,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_011_below_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_011_below_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "below",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.8,
+          "x2": 0.2,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_012_below_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_012_below_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "below",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.8,
+          "x2": 0.2,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_013_overlaps_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_013_overlaps_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "overlaps",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": 0.1
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.3,
+          "y2": 0.3
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.2,
+          "y1": 0.2,
+          "x2": 0.4,
+          "y2": 0.4
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_014_overlaps_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_014_overlaps_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "overlaps",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": 0.1
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.8,
+          "x2": 0.9,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_015_near_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_015_near_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "near",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.15,
+          "y1": 0.15,
+          "x2": 0.25,
+          "y2": 0.25
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_016_near_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_016_near_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "near",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.8,
+          "x2": 0.9,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_017_far_sat",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_017_far_sat",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "far",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.8,
+          "x2": 0.9,
+          "y2": 0.9
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_018_far_viol",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_018_far_viol",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {},
+      "spatial_rules": [
+        {
+          "rule_type": "far",
+          "subject_class": "Beaker",
+          "target": "Funnel",
+          "threshold": null
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Funnel",
+        "box": {
+          "x1": 0.2,
+          "y1": 0.2,
+          "x2": 0.3,
+          "y2": 0.3
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "SPATIAL_RELATION_VIOLATION",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_019_multiple_violations",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_019_multiple_violations",
+      "required_objects": {
+        "Beaker": 1,
+        "Funnel": 1
+      },
+      "regions": {
+        "work_zone": {
+          "x1": 0.5,
+          "y1": 0.5,
+          "x2": 0.9,
+          "y2": 0.9
+        }
+      },
+      "spatial_rules": [
+        {
+          "rule_type": "inside",
+          "subject_class": "Beaker",
+          "target": "work_zone",
+          "threshold": 0.5
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.0,
+          "y1": 0.0,
+          "x2": 0.1,
+          "y2": 0.1
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": false,
+      "violations": [
+        {
+          "type": "MISSING_OBJECT",
+          "target": "Funnel"
+        },
+        {
+          "type": "MISPLACED_OBJECT",
+          "target": "Beaker"
+        }
+      ]
+    }
+  },
+  {
+    "sample_id": "test_020_multiple_same_class",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_020_multiple_same_class",
+      "required_objects": {
+        "Beaker": 2
+      },
+      "regions": {},
+      "spatial_rules": []
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.1,
+          "y1": 0.1,
+          "x2": 0.2,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      },
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.8,
+          "y1": 0.1,
+          "x2": 0.9,
+          "y2": 0.2
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_021_boundary_condition",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_021_boundary_condition",
+      "required_objects": {
+        "Beaker": 1
+      },
+      "regions": {
+        "work_zone": {
+          "x1": 0.0,
+          "y1": 0.0,
+          "x2": 0.5,
+          "y2": 0.5
+        }
+      },
+      "spatial_rules": [
+        {
+          "rule_type": "inside",
+          "subject_class": "Beaker",
+          "target": "work_zone",
+          "threshold": 0.99
+        }
+      ]
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.0,
+          "y1": 0.0,
+          "x2": 0.5,
+          "y2": 0.5
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  },
+  {
+    "sample_id": "test_022_invalid_ambiguous",
+    "image_ref": "synthetic",
+    "image_width": 1000,
+    "image_height": 1000,
+    "setup_specification": {
+      "setup_name": "setup_test_022_invalid_ambiguous",
+      "required_objects": {
+        "Beaker": 1
+      },
+      "regions": {},
+      "spatial_rules": []
+    },
+    "objects": [
+      {
+        "class_name": "Beaker",
+        "box": {
+          "x1": 0.5,
+          "y1": 0.5,
+          "x2": 0.5,
+          "y2": 0.5
+        },
+        "confidence": 1.0
+      }
+    ],
+    "expected_output": {
+      "compliant": true,
+      "violations": []
+    }
+  }
+]
