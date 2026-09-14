@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 import json
 import os
 from pathlib import Path
@@ -10,7 +10,7 @@ def test_source_manifest_integrity():
     with open(manifest_path, "r", encoding="utf-8") as f:
         data = json.load(f)
         
-    assert len(data) == 9
+    assert len(data) >= 16
     
     seen_hashes = set()
     for item in data:
@@ -28,7 +28,7 @@ def test_annotation_workspace_status():
     assert os.path.exists(ann_dir)
     
     files = list(Path(ann_dir).glob("*.json"))
-    assert len(files) == 9
+    assert len(files) >= 16
     
     for ann_file in files:
         with open(ann_file, "r", encoding="utf-8") as f:

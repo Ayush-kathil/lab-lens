@@ -55,3 +55,53 @@ All images sourced from Wikimedia Commons.
 - **Creator**: <a href="https://en.wikipedia.org/wiki/nl:User:Svdmolen" class="extiw" title="w:nl:User:Svdmolen">Svdmolen</a> at <a href="https://en.wikipedia.org/wiki/nl:" class="extiw" title="w:nl:">Dutch Wikipedia</a>
 - **License**: [Public domain]()
 - **Source**: https://commons.wikimedia.org/wiki/File:Pipetteerballon.png
+## rw_010
+- **Title**: File:8 Śląski Festiwal Nauki, MCK, Katowice,, 09.12.2024, 1256.jpg
+- **Creator**: <a href="//commons.wikimedia.org/wiki/User:KrzysztofPoplawski" title="User:KrzysztofPoplawski">Krzysztof Popławski</a>
+- **License**: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
+- **Source**: https://commons.wikimedia.org/wiki/File:8_%C5%9Al%C4%85ski_Festiwal_Nauki,_MCK,_Katowice,,_09.12.2024,_1256.jpg
+- **Spatial Value**: HIGH
+
+## rw_011
+- **Title**: File:An Analytical Setup.jpg
+- **Creator**: Goodymeraj
+- **License**: [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en)
+- **Source**: https://commons.wikimedia.org/wiki/File:An_Analytical_Setup.jpg
+- **Spatial Value**: HIGH
+
+## rw_012
+- **Title**: File:Titration-setup-eng.png
+- **Creator**: <a class="external free" href="https://commons.wikimedia.org/wiki/User:Muskid">https://commons.wikimedia.org/wiki/User:Muskid</a>
+- **License**: [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0)
+- **Source**: https://commons.wikimedia.org/wiki/File:Titration-setup-eng.png
+- **Spatial Value**: HIGH
+
+## rw_013
+- **Title**: File:Distillation 2-3.jpg
+- **Creator**: <ul><li><a href="//commons.wikimedia.org/wiki/File:Distillation_2.jpg" title="File:Distillation 2.jpg">Distillation_2.jpg</a>: <a rel="nofollow" class="external text" href="https://www.flickr.com/photos/24049265@N00">Arlen</a></li>
+<li>derivative work: <a href="//commons.wikimedia.org/w/index.php?title=Mario_Link&amp;action=edit&amp;redlink=1" class="new" title="Mario Link (page does not exist)">Mario Link</a></li></ul>
+- **License**: [CC BY 2.0](https://creativecommons.org/licenses/by/2.0)
+- **Source**: https://commons.wikimedia.org/wiki/File:Distillation_2-3.jpg
+- **Spatial Value**: HIGH
+
+## rw_014
+- **Title**: File:Fraktionierte Destillation - Laboratory Fractional distillation apparatus.jpg
+- **Creator**: <a rel="nofollow" class="external text" href="https://www.flickr.com/people/60470735@N05">Chemie-Verbände Baden-Württemberg</a>
+- **License**: [CC BY 2.0](https://creativecommons.org/licenses/by/2.0)
+- **Source**: https://commons.wikimedia.org/wiki/File:Fraktionierte_Destillation_-_Laboratory_Fractional_distillation_apparatus.jpg
+- **Spatial Value**: HIGH
+
+## rw_015
+- **Title**: File:Ignition Tube.png
+- **Creator**: William Ripley Nichols
+- **License**: [Public domain]()
+- **Source**: https://commons.wikimedia.org/wiki/File:Ignition_Tube.png
+- **Spatial Value**: HIGH
+
+## rw_016
+- **Title**: File:Stalagmometer setup.jpg
+- **Creator**: <a href="//commons.wikimedia.org/wiki/User:ECTran71" title="User:ECTran71">ECTran71</a>
+- **License**: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0)
+- **Source**: https://commons.wikimedia.org/wiki/File:Stalagmometer_setup.jpg
+- **Spatial Value**: HIGH
+
