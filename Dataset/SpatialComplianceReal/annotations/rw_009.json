@@ -1,0 +1,23 @@
+{
+  "sample_id": "rw_009",
+  "session_id": "session_009",
+  "split": "unassigned",
+  "annotation_status": "NEEDS_REVIEW",
+  "image_metadata": {
+    "filename": "rw_009.png",
+    "width": 1000,
+    "height": 1000,
+    "viewpoint": "unknown"
+  },
+  "objects": [],
+  "setup_specification": {
+    "setup_name": "unknown_setup",
+    "required_objects": {},
+    "regions": {},
+    "spatial_rules": []
+  },
+  "ground_truth": {
+    "compliant": false,
+    "violations": []
+  }
+}
