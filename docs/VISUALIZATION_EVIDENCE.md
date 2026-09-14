@@ -5,6 +5,9 @@ This document details the generation of visual evidence for the VITyarthi projec
 ## Methodology
 The visualizations were generated via a dedicated script (`scripts/visualize_detection.py`) which orchestrates the identical inference pipeline components used in the primary Lab Lens CLI. 
 
+**Zero-Detection Discrepancy Resolution:**
+Initial tests on `test-lab.jpg` correctly produced 0 detections. It was questioned whether this was a bug in the visualization script diverging from the main `LabLensPipeline`. A strict forensic audit proved that the official pipeline (`uv run python -m lab_lens infer ...`) **also** yields 0 detections on `test-lab.jpg`. The script accurately mirrors the pipeline's lack of predictions for this specific image. To categorically guarantee zero deviation moving forward, the visualization script was refactored to directly invoke `LabLensPipeline(model_path=args.model).run(args.image)` rather than instantiating the base `YOLODetector`, guaranteeing identical preprocessing, boundary coordinates, and threshold logic. When executed against a populated setup (e.g. `rw_001.jpg`), it successfully validates exact E2E parity.
+
 - **Input Image**: `test-lab.jpg`
 - **Model Checkpoint**: `runs/detect/outputs/baseline_training_final/weights/best.pt`
 - **Objects Detected**: 0 (The YOLOv8 baseline model did not detect any equipment exceeding the minimum confidence threshold in this specific frame).
