@@ -147,4 +147,9 @@ def test_pipeline_j_determinism(dummy_image):
     res1 = pipeline1.run(dummy_image, setup, rules)
     res2 = pipeline2.run(dummy_image, setup, rules)
 
-    assert json.dumps(res1.to_dict(), sort_keys=True) == json.dumps(res2.to_dict(), sort_keys=True)
+    dict1 = res1.to_dict()
+    dict2 = res2.to_dict()
+    dict1.pop("timing", None)
+    dict2.pop("timing", None)
+
+    assert json.dumps(dict1, sort_keys=True) == json.dumps(dict2, sort_keys=True)

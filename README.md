@@ -1,46 +1,48 @@
 # Lab Lens
 
-Lab-Lens — Vision-Based Laboratory Equipment Verification & Spatial Compliance System.
+Lab Lens is a vision-based laboratory equipment verification and spatial-compliance prototype that combines object detection, geometric spatial reasoning, explainable rule-based compliance evaluation, and transparent condition-coverage scoring.
 
-Lab Lens is a modular Computer Vision system designed to analyze laboratory images, identify equipment, reason about spatial arrangements, and verify compliance against a reference setup. It calculates explainable compliance scores and generates detailed reports, ensuring safety and standard operating procedure adherence in laboratory environments.
+This system is designed to analyze laboratory images, identify equipment, reason about spatial arrangements, and verify compliance against a reference setup. It calculates deterministic compliance scores and generates detailed reports. 
 
-## Problem
-Manual verification of laboratory setups is error-prone and time-consuming. Incorrect setups can lead to safety hazards or failed experiments. Lab Lens automates this process by applying object detection and spatial reasoning to workspace images.
-
-## Motivation
-This project serves as a serious academic and portfolio-grade engineering endeavor. It demonstrates the ability to build a robust, production-quality machine learning system that goes beyond a simple YOLO demo by incorporating spatial verification and explainable compliance reporting.
+**Disclaimer**: The numerical compliance score represents explicit configured condition coverage and NOT physical safety probability. This is a prototype system and is not certified for physical laboratory safety or real-world safety enforcement.
 
 ## Key Features
-- **Image Quality Analysis** (Implemented): Assesses input images for blur, lighting, and resolution.
-- **Dataset Validation & Repair** (Implemented): Mathematically validates and repairs cross-split leakage.
-- **Object Detection** (Planned / Foundation built): Identifies 25 categories of lab apparatus.
-- **Perspective Correction** (Planned): Optionally aligns images using homography and feature matching.
-- **Spatial Reasoning** (Planned): Verifies if equipment is placed in the correct normalized workspace regions.
-- **Compliance Scoring** (Planned): Computes an explainable score based on missing, misplaced, or extra equipment.
-- **Report Generation** (Planned): Outputs JSON, Markdown, and annotated images.
 
-## Architecture
+### Implemented
+- **Image Quality Analysis**: Assesses input images for blur, lighting, and resolution before inference.
+- **Dataset Validation & Repair**: Mathematically validated, deterministically repaired cross-split leakage for the baseline dataset.
+- **Object Detection**: YOLOv8-based detection identifying up to 25 categories of lab apparatus (trained on a CPU-friendly short baseline).
+- **Spatial Reasoning**: Verifies spatial relations (e.g., `left_of`, `inside`, `near`) using geometric bounding box analysis. Validated against 21 canonical synthetic spatial exact-match fixtures.
+- **Explainable Compliance Scoring**: Evaluates detected setups against explicit setup configurations, emitting a 0-100 score based on condition coverage (missing objects, extra objects, rule violations).
+- **Integrated Pipeline**: End-to-end Python API and CLI (`LabLensPipeline`) connecting image reading, quality, detection, spatial reasoning, and compliance reporting.
+- **Real-World AI-Silver Pilot**: End-to-end pipeline execution demonstrated on 16 authentic, licensed real-world photographs using AI-generated `SILVER_LABEL` annotations.
+
+### Not Claimed / Limitations
+- **No human-validated real-world spatial benchmark**: The AI-generated silver data is used for pipeline integration testing and does NOT represent human-validated ground truth.
+- **Not a production deployment certification**: The system remains a research prototype.
+- **Not a statistically calibrated safety probability**: Scores strictly reflect logical condition matching.
+
+## Architecture & Computer Vision Techniques
 Lab Lens is built with a modular Python architecture. Key boundaries include:
-- `preprocessing/`: Quality checks and image enhancements.
-- `detection/`: Abstracted object detection interface.
-- `spatial/`: Region logic and workspace verification.
-- `scoring/`: Explainable compliance engine.
-- `reporting/`: Generators for visual and text reports.
+- `preprocessing/`: Quality checks (blur variance, brightness, contrast).
+- `detection/`: Object detection interface utilizing Ultralytics YOLO.
+- `spatial/`: Geometric relations, rule evaluations, and Cartesian spatial logic.
+- `pipeline.py`: Main orchestration interface yielding structured `LabLensResult` datatypes.
 
-## Computer Vision Techniques
-- Feature Matching & Homography (SIFT/RANSAC)
-- Histogram/Contrast Enhancement
-- Bounding Box Intersection & Spatial Mapping
-- Deep Learning-based Object Detection (YOLO-family)
+## Datasets
 
-## Dataset Usage
+### 1. ChemEq25 (Detector Training)
+Lab Lens uses the **ChemEq25** dataset as the primary object-detection training resource.
+- **Role**: Object detection only (no spatial compliance ground truth).
+- **Source**: Official Figshare distribution ([Link](https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433))
+- **Status**: The protected 455-image test split has been retained, isolated, and remains unmodified for proper benchmarking.
+- *Note: Raw datasets are ignored via `.gitignore` to prevent repository bloat.*
 
-Lab Lens uses the **ChemEq25** dataset as the primary laboratory-equipment detection dataset.
+### 2. Synthetic Spatial Fixtures
+- **Role**: Validates the spatial logic engine deterministically. Contains 21 exact-match synthetic geometric tests.
 
-*   **Dataset Source:** Official Figshare distribution ([Link](https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433))
-*   **License:** CC BY 4.0
-
-*Note: The dataset is NOT committed to Git. The project expects the dataset to be located in the local `Dataset/ChemEq25_figshare/` directory.*
+### 3. Real-World Silver Pilot
+- **Role**: E2E pipeline integration testing. Contains 16 licensed real-world lab images. Annotations are strictly `AI_GENERATED` and `SILVER_LABEL`.
 
 ## Installation
 ```bash
@@ -49,57 +51,41 @@ cd Lab-lens
 pip install -r requirements.txt
 ```
 
-## Dataset Setup
-1. Download the official ChemEq25 dataset from Figshare.
-2. Place it in `Dataset/ChemEq25_figshare/` at the project root and extract the `.rar` file inside it.
-3. Validate: `python -m lab_lens validate-dataset --dataset Dataset/ChemEq25_figshare`
-
-## Training (Planned / Scaffolded)
-The training interface is scaffolded. Real training will be implemented in a future phase.
-```bash
-python -m lab_lens train --dataset Dataset/ChemEq25_training --config configs/training.yaml --dry-run
-```
-
-## Evaluation (Planned / Scaffolded)
-```bash
-python -m lab_lens evaluate --model outputs/best.pt --dataset Dataset/ChemEq25_training
-```
-
 ## CLI Usage
+
+Run the integrated end-to-end inference pipeline:
+```bash
+# Basic evaluation (Unspecified setup)
+python -m lab_lens infer --image path/to/image.jpg --model runs/detect/outputs/baseline_training_final/weights/best.pt
+
+# Compliance verification against a YAML setup
+python -m lab_lens infer --image path/to/image.jpg --model runs/detect/outputs/baseline_training_final/weights/best.pt --setup configs/example_setup.yaml
+
+# JSON output
+python -m lab_lens infer --image path/to/image.jpg --model runs/detect/outputs/baseline_training_final/weights/best.pt --setup configs/example_setup.yaml --json
+```
+
+Other utilities:
 ```bash
 python -m lab_lens quality --input path/to/image.jpg
-python -m lab_lens audit-dataset-pairs --dataset Dataset/ChemEq25_figshare
-python -m lab_lens analyze --input path/to/image.jpg --config configs/lab_setup.yaml
+python -m lab_lens audit-dataset-pairs --dataset Dataset/ChemEq25
+python -m lab_lens evaluate --model runs/detect/outputs/baseline_training_final/weights/best.pt --dataset Dataset/ChemEq25
 ```
 
-## Example Output
-The system generates:
-- An annotated image visualizing boxes and regions.
-- A JSON report detailing detection confidences and spatial matches.
-- A Markdown summary explaining the compliance score and any warnings.
+## Training & Evaluation
+The detector was evaluated on the protected ChemEq25 test split. Performance represents a fast, CPU-trained baseline, not a state-of-the-art deployment:
+- **Validation (Epoch 3)**: Precision: 0.86, Recall: 0.85, mAP50: 0.90
+- **Held-out Test**: Precision: 0.84, Recall: 0.84, mAP50: 0.88
 
-## Project Structure
-- `src/Lab Lens/`: Core application logic.
-- `tests/`: Unit and integration tests.
-- `configs/`: YAML setup definitions.
-- `docs/`: In-depth documentation (Architecture, Algorithms, Dataset).
-- `scripts/`: Development and ML lifecycle scripts.
+To train the detector (requires pre-configured `Dataset/ChemEq25`):
+```bash
+python -m lab_lens train --dataset Dataset/ChemEq25 --config configs/training.yaml
+```
 
 ## Testing
 ```bash
 pytest tests/
 ```
 
-## Limitations
-- ChemEq25 provides object detection labels but not spatial compliance ground truth.
-- Perspective correction requires a clear reference frame to succeed.
-
-## Future Work
-- Support for 3D spatial reasoning.
-- Real-time video feed verification.
-
 ## Dataset Citation
 ChemEq25: Chemistry Lab Image Dataset Covering 25 Apparatus Categories. Figshare. https://figshare.com/articles/dataset/_b_Chemistry_Lab_Image_Dataset_Covering_25_Apparatus_Categories_b_/29110433
-
-## License
-[Add License Here]
