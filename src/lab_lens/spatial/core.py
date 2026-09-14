@@ -1,4 +1,4 @@
-﻿import math
+import math
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any
 from enum import Enum
@@ -77,6 +77,9 @@ class ComplianceResult:
     misplaced_objects: List[str]
     spatial_relation_violations: List[str]
     satisfied_rules: List[str] = field(default_factory=list)
+    score: Optional[float] = None
+    total_conditions: int = 0
+    satisfied_conditions: int = 0
 
 class GeometricRelations:
     @staticmethod

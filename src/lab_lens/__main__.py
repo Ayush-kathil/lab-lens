@@ -205,6 +205,11 @@ def main():
             print("Compliance:")
             print(f"  {result.compliance_status}")
             print()
+            if result.compliance_result and result.compliance_result.score is not None:
+                print("Score:")
+                print(f"  {result.compliance_result.score:.1f} / 100")
+                print(f"  ({result.compliance_result.satisfied_conditions} of {result.compliance_result.total_conditions} conditions satisfied)")
+                print()
             print("Violations:")
             if result.compliance_result and result.compliance_result.violations:
                 for v in result.compliance_result.violations:
@@ -213,10 +218,19 @@ def main():
                 print("  None")
             print()
             print("Warnings/Errors:")
+            if not result.warnings and not result.error:
+                print("  None")
             for w in result.warnings:
                 print(f"  - WARNING: {w}")
             if result.error:
                 print(f"  - ERROR: {result.error}")
+            print()
+            print("Timing:")
+            if result.timing:
+                for phase, t in result.timing.items():
+                    print(f"  {phase.ljust(15)}: {t:.4f}s")
+            else:
+                print("  None")
     elif args.command == "quality":
         from lab_lens.config.loader import load_config
         from lab_lens.preprocessing.image_quality import analyze_image_quality
