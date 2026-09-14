@@ -26,12 +26,12 @@ def main():
 
     # system-info
     sys_parser = subparsers.add_parser("system-info", help="Print system and hardware information")
-    
+
     # prepare-dataset
     prep_parser = subparsers.add_parser("prepare-dataset", help="Deterministically repair and prepare dataset")
     prep_parser.add_argument("--source", required=True, help="Path to source dataset")
     prep_parser.add_argument("--output", required=True, help="Path to output derived dataset")
-    
+
     # verify-dataset
     vf_parser = subparsers.add_parser("verify-dataset", help="Verify the prepared dataset")
     vf_parser.add_argument("--dataset", required=True, help="Path to derived dataset")
@@ -52,6 +52,13 @@ def main():
     pr_parser = subparsers.add_parser("predict", help="Run detector prediction")
     pr_parser.add_argument("--model", required=True, help="Path to model weights")
     pr_parser.add_argument("--input", required=True, help="Path to input image")
+
+    # infer
+    inf_parser = subparsers.add_parser("infer", help="Run end-to-end Lab Lens pipeline")
+    inf_parser.add_argument("--image", required=True, help="Path to input image")
+    inf_parser.add_argument("--model", help="Path to YOLO model weights (optional for smoke tests)")
+    inf_parser.add_argument("--setup", help="Path to spatial setup config (YAML) (optional)")
+    inf_parser.add_argument("--json", action="store_true", help="Output machine-readable JSON")
 
     args = parser.parse_args()
 
@@ -98,18 +105,130 @@ def main():
         except Exception as e:
             print(f"Error during prediction: {e}")
             sys.exit(1)
+    elif args.command == "infer":
+        import json
+        from lab_lens.pipeline import LabLensPipeline
+        from lab_lens.spatial.engine import SetupSpecification, SpatialRule
+        from lab_lens.spatial.core import BoundingBox
+        setup_spec = None
+        spatial_rules = []
+        if args.setup:
+            try:
+                import json
+                with open(args.setup, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+
+                regions = {}
+                for k, v in config.get("regions", {}).items():
+                    regions[k] = BoundingBox(v["x1"], v["y1"], v["x2"], v["y2"])
+
+                setup_spec = SetupSpecification(
+                    setup_name=config.get("setup_name", "custom_setup"),
+                    required_objects=config.get("required_objects", {}),
+                    regions=regions
+                )
+
+                for r in config.get("spatial_rules", []):
+                    spatial_rules.append(SpatialRule(
+                        rule_type=r["rule_type"],
+                        subject_class=r["subject_class"],
+                        target=r["target"],
+                        threshold=r.get("threshold")
+                    ))
+            except ImportError:
+                print("Error: PyYAML not installed.", file=sys.stderr)
+                sys.exit(1)
+            except Exception as e:
+                try:
+                    # Fallback to PyYAML if available and it's a YAML file
+                    import yaml
+                    with open(args.setup, "r", encoding="utf-8") as f:
+                        config = yaml.safe_load(f)
+
+                    regions = {}
+                    for k, v in config.get("regions", {}).items():
+                        regions[k] = BoundingBox(v["x1"], v["y1"], v["x2"], v["y2"])
+
+                    setup_spec = SetupSpecification(
+                        setup_name=config.get("setup_name", "custom_setup"),
+                        required_objects=config.get("required_objects", {}),
+                        regions=regions
+                    )
+
+                    for r in config.get("spatial_rules", []):
+                        spatial_rules.append(SpatialRule(
+                            rule_type=r["rule_type"],
+                            subject_class=r["subject_class"],
+                            target=r["target"],
+                            threshold=r.get("threshold")
+                        ))
+                except Exception as e:
+                    print(f"Error loading setup config: {e}", file=sys.stderr)
+                    sys.exit(1)
+
+        pipeline = LabLensPipeline(model_path=args.model)
+        result = pipeline.run(args.image, setup_spec, spatial_rules)
+
+        if args.json:
+            print(json.dumps(result.to_dict(), indent=2))
+        else:
+            print("LAB LENS")
+            print("────────────────────────────")
+            print(f"Image: {args.image}")
+            print()
+            print("Image Quality:")
+            if result.quality:
+                print(f"  {result.quality.status}")
+                if result.quality.warnings:
+                    for w in result.quality.warnings:
+                        print(f"  - WARNING: {w}")
+            else:
+                print("  ERROR")
+            print()
+            print("Detections:")
+            if result.detections:
+                for d in result.detections:
+                    print(f"  {d.id.ljust(14)} confidence={d.confidence:.2f}")
+            else:
+                print("  None")
+            print()
+            print("Spatial Analysis:")
+            if result.compliance_result and result.compliance_result.satisfied_rules:
+                for rule in result.compliance_result.satisfied_rules:
+                    print(f"  {rule}")
+            else:
+                print("  None")
+            print()
+            print("Setup:")
+            print(f"  {setup_spec.setup_name if setup_spec else 'UNSPECIFIED'}")
+            print()
+            print("Compliance:")
+            print(f"  {result.compliance_status}")
+            print()
+            print("Violations:")
+            if result.compliance_result and result.compliance_result.violations:
+                for v in result.compliance_result.violations:
+                    print(f"  - {v.message}")
+            else:
+                print("  None")
+            print()
+            print("Warnings/Errors:")
+            for w in result.warnings:
+                print(f"  - WARNING: {w}")
+            if result.error:
+                print(f"  - ERROR: {result.error}")
     elif args.command == "quality":
         from lab_lens.config.loader import load_config
         from lab_lens.preprocessing.image_quality import analyze_image_quality
         import cv2
-        
+
         try:
             config = load_config(args.config)
             img = cv2.imread(args.input)
             if img is None:
                 print(f"Error: Could not load image {args.input}")
                 sys.exit(1)
-                
+
             res = analyze_image_quality(img, config)
             print("LAB LENS — IMAGE QUALITY ANALYSIS\n")
             print(f"Image: {args.input}")
@@ -119,7 +238,7 @@ def main():
             print(f"Blur: {res.blur_score:.2f}\n")
             print(f"Overall quality: {res.status}")
             print(f"Warnings: {', '.join(res.warnings) if res.warnings else 'None'}")
-            
+
             if res.status == "FAIL":
                 sys.exit(1)
         except Exception as e:
