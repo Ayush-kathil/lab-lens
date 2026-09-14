@@ -1,0 +1,9 @@
+setup_name: "non_compliant_demo"
+required_objects:
+  Beaker: 1
+  Volumetric_Flask: 1
+  Stand: 1
+spatial_rules:
+  - rule_type: "left_of"
+    subject_class: "Beaker"
+    target: "Volumetric_Flask"
