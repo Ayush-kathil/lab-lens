@@ -60,15 +60,26 @@ class LabLensPipeline:
                 error="FILE_NOT_FOUND"
             )
 
-        img = cv2.imread(image_path)
-        if img is None:
+        try:
+            img = cv2.imread(image_path)
+            if img is None:
+                return LabLensResult(
+                    image_path=image_path,
+                    quality=None,
+                    detections=[],
+                    compliance_status="ERROR",
+                    compliance_result=None,
+                    warnings=["Unreadable image"],
+                    error="UNREADABLE_IMAGE"
+                )
+        except Exception as e:
             return LabLensResult(
                 image_path=image_path,
                 quality=None,
                 detections=[],
                 compliance_status="ERROR",
                 compliance_result=None,
-                warnings=["Unreadable image"],
+                warnings=[f"Image read exception: {str(e)}"],
                 error="UNREADABLE_IMAGE"
             )
 
