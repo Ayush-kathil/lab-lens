@@ -2,6 +2,7 @@ import pytest
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 from lab_lens.spatial import SpatialEvaluationHarness
 
@@ -45,7 +46,7 @@ def test_cli_api_consistency():
     
     # CLI
     result = subprocess.run(
-        [r".venv\Scripts\python", "scripts/evaluate_spatial_dataset.py", "--dataset", fixture_path],
+        [sys.executable, "scripts/evaluate_spatial_dataset.py", "--dataset", fixture_path],
         capture_output=True, text=True
     )
     
