@@ -2,22 +2,59 @@
   "sample_id": "rw_014",
   "session_id": "session_014",
   "split": "unassigned",
-  "annotation_status": "NEEDS_REVIEW",
+  "annotation_status": "AI_GENERATED",
   "image_metadata": {
     "filename": "rw_014.jpg",
     "width": 1000,
     "height": 1000,
     "viewpoint": "unknown"
   },
-  "objects": [],
+  "objects": [
+    {
+      "object_id": "flask_1",
+      "class_name": "Round_Bottom_Flask_Borosilicate_Glass_1_Neck",
+      "box": {
+        "x1": 0.3,
+        "y1": 0.7,
+        "x2": 0.5,
+        "y2": 0.9
+      },
+      "ai_confidence": "HIGH"
+    },
+    {
+      "object_id": "column_1",
+      "class_name": "OTHER_LAB_EQUIPMENT",
+      "unmapped_object_type": "fractionating column",
+      "box": {
+        "x1": 0.35,
+        "y1": 0.2,
+        "x2": 0.45,
+        "y2": 0.7
+      },
+      "ai_confidence": "MEDIUM"
+    }
+  ],
   "setup_specification": {
-    "setup_name": "unknown_setup",
+    "setup_name": "fractional_distillation",
     "required_objects": {},
     "regions": {},
-    "spatial_rules": []
+    "spatial_rules": [
+      {
+        "subject_id": "column_1",
+        "target_id": "flask_1",
+        "rule_type": "above"
+      }
+    ]
   },
   "ground_truth": {
-    "compliant": false,
-    "violations": []
-  }
+    "compliant": null,
+    "violations": [],
+    "compliance_source": "AI_INFERENCE",
+    "compliance_label": "AMBIGUOUS"
+  },
+  "annotation_source": "AI_GENERATED",
+  "ground_truth_status": "SILVER_LABEL",
+  "review_required": true,
+  "dataset_status": "ACCEPTED",
+  "spatial_value": "HIGH"
 }

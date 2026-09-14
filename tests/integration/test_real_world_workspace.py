@@ -34,5 +34,6 @@ def test_annotation_workspace_status():
         with open(ann_file, "r", encoding="utf-8") as f:
             ann = json.load(f)
             
-        assert ann["annotation_status"] == "NEEDS_REVIEW"
+        assert ann["annotation_status"] in ("NEEDS_REVIEW", "AI_GENERATED")
         assert "HUMAN_VERIFIED" not in ann["annotation_status"]
+        assert ann.get("ground_truth", {}).get("compliant") is None

@@ -2,7 +2,7 @@
   "sample_id": "rw_012",
   "session_id": "session_012",
   "split": "unassigned",
-  "annotation_status": "NEEDS_REVIEW",
+  "annotation_status": "AI_GENERATED",
   "image_metadata": {
     "filename": "rw_012.png",
     "width": 1000,
@@ -17,7 +17,14 @@
     "spatial_rules": []
   },
   "ground_truth": {
-    "compliant": false,
-    "violations": []
-  }
+    "compliant": null,
+    "violations": [],
+    "compliance_source": "AI_INFERENCE",
+    "compliance_label": "AMBIGUOUS"
+  },
+  "annotation_source": "AI_GENERATED",
+  "ground_truth_status": "SILVER_LABEL",
+  "review_required": true,
+  "dataset_status": "REJECTED",
+  "spatial_value": "LOW"
 }

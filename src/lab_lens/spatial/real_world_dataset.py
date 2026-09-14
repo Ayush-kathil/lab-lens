@@ -1,4 +1,4 @@
-﻿import json
+import json
 from pathlib import Path
 from typing import Dict, List, Any
 
@@ -8,7 +8,7 @@ class RealWorldDatasetValidator:
         'image_metadata', 'objects', 'setup_specification', 'ground_truth'
     ]
     
-    VALID_STATUSES = {'ACCEPTED', 'REJECTED', 'AMBIGUOUS', 'NEEDS_REVIEW'}
+    VALID_STATUSES = {'ACCEPTED', 'REJECTED', 'AMBIGUOUS', 'NEEDS_REVIEW', 'AI_GENERATED'}
     VALID_SPLITS = {'train', 'validation', 'test', 'unassigned'}
     VALID_VIOLATIONS = {'MISSING_OBJECT', 'EXTRA_OBJECT', 'MISPLACED_OBJECT', 'SPATIAL_RELATION_VIOLATION', 'COUNT_VIOLATION'}
     VALID_RELATIONS = {'left_of', 'right_of', 'above', 'below', 'inside', 'overlaps', 'near', 'far'}

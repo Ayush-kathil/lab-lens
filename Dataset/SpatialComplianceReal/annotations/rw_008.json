@@ -2,14 +2,26 @@
   "sample_id": "rw_008",
   "session_id": "session_008",
   "split": "unassigned",
-  "annotation_status": "NEEDS_REVIEW",
+  "annotation_status": "AI_GENERATED",
   "image_metadata": {
     "filename": "rw_008.jpg",
     "width": 1000,
     "height": 1000,
     "viewpoint": "unknown"
   },
-  "objects": [],
+  "objects": [
+    {
+      "object_id": "beaker_1",
+      "class_name": "Beaker",
+      "box": {
+        "x1": 0.1,
+        "y1": 0.1,
+        "x2": 0.9,
+        "y2": 0.9
+      },
+      "ai_confidence": "HIGH"
+    }
+  ],
   "setup_specification": {
     "setup_name": "unknown_setup",
     "required_objects": {},
@@ -17,7 +29,14 @@
     "spatial_rules": []
   },
   "ground_truth": {
-    "compliant": false,
-    "violations": []
-  }
+    "compliant": null,
+    "violations": [],
+    "compliance_source": "AI_INFERENCE",
+    "compliance_label": "AMBIGUOUS"
+  },
+  "annotation_source": "AI_GENERATED",
+  "ground_truth_status": "SILVER_LABEL",
+  "review_required": true,
+  "dataset_status": "ACCEPTED",
+  "spatial_value": "LOW"
 }

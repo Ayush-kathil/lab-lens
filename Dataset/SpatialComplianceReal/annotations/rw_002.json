@@ -1,23 +1,30 @@
 {
-  "sample_id": "rw_002",
-  "session_id": "session_002",
-  "split": "unassigned",
-  "annotation_status": "NEEDS_REVIEW",
+  "annotation_status": "AI_GENERATED",
+  "ground_truth": {
+    "compliant": null,
+    "violations": [],
+    "compliance_source": "AI_INFERENCE",
+    "compliance_label": "AMBIGUOUS"
+  },
   "image_metadata": {
     "filename": "rw_002.jpg",
-    "width": 1000,
     "height": 1000,
-    "viewpoint": "unknown"
+    "viewpoint": "unknown",
+    "width": 1000
   },
   "objects": [],
+  "sample_id": "rw_002",
+  "session_id": "session_002",
   "setup_specification": {
-    "setup_name": "unknown_setup",
-    "required_objects": {},
     "regions": {},
+    "required_objects": {},
+    "setup_name": "unknown_setup",
     "spatial_rules": []
   },
-  "ground_truth": {
-    "compliant": false,
-    "violations": []
-  }
+  "split": "unassigned",
+  "annotation_source": "AI_GENERATED",
+  "ground_truth_status": "SILVER_LABEL",
+  "review_required": true,
+  "dataset_status": "REJECTED",
+  "spatial_value": "LOW"
 }
