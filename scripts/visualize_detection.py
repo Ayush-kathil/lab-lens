@@ -38,6 +38,8 @@ def main():
 
     print(f"Detected {len(detections)} objects:")
 
+    base_name = os.path.splitext(os.path.basename(args.image))[0]
+
     # 1. YOLO Detection Visualization
     img_yolo = img.copy()
     for d in detections:
@@ -55,7 +57,7 @@ def main():
         cv2.rectangle(img_yolo, (x1, y1 - h - 5), (x1 + w, y1), (0, 255, 0), -1)
         cv2.putText(img_yolo, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
-    yolo_path = os.path.join(args.outdir, "test_lab_yolo_detection.jpg")
+    yolo_path = os.path.join(args.outdir, f"{base_name}_yolo_detection.jpg")
     cv2.imwrite(yolo_path, img_yolo)
     print(f"Saved YOLO visualization to: {yolo_path}")
 
@@ -65,7 +67,7 @@ def main():
     img_blur = cv2.GaussianBlur(img_gray, (5, 5), 0)
     edges = cv2.Canny(img_blur, 50, 150)
 
-    edge_path = os.path.join(args.outdir, "test_lab_edges.jpg")
+    edge_path = os.path.join(args.outdir, f"{base_name}_edges.jpg")
     cv2.imwrite(edge_path, edges)
     print(f"Saved Edge visualization to: {edge_path}")
 
@@ -85,7 +87,7 @@ def main():
         cv2.rectangle(img_combined, (x1, y1 - h - 5), (x1 + w, y1), (0, 255, 0), -1)
         cv2.putText(img_combined, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
-    combined_path = os.path.join(args.outdir, "test_lab_combined.jpg")
+    combined_path = os.path.join(args.outdir, f"{base_name}_combined.jpg")
     cv2.imwrite(combined_path, img_combined)
     print(f"Saved Combined visualization to: {combined_path}")
 
