@@ -39,10 +39,12 @@
 
 ## Forensic Audit Summary
 
+Classification counts are derived from the 30 individual forensic findings.
+
 A. Number of CONFIRMED_DEFECT findings: **2** (F15, F22)
 B. Number of VALID_LIMITATION findings: **9** (F1, F3, F9, F10, F11, F12, F17, F24, F28)
-C. Number of IMPROVEMENT_OPPORTUNITY findings: **9** (F2, F4, F19, F20, F21, F23, F26, F29)
-D. Number of FALSE_OR_UNSUPPORTED findings: **8** (F5, F7, F13, F14, F16, F18, F25, F27, F30)
+C. Number of IMPROVEMENT_OPPORTUNITY findings: **8** (F2, F4, F19, F20, F21, F23, F26, F29)
+D. Number of FALSE_OR_UNSUPPORTED findings: **9** (F5, F7, F13, F14, F16, F18, F25, F27, F30)
 E. Number of SCOPE_MISMATCH findings: **2** (F6, F8)
 
 F. **Exact confirmed defects fixed:**
@@ -50,7 +52,7 @@ F. **Exact confirmed defects fixed:**
 - **F22**: Exception masking on model load. Fixed by explicitly catching `Exception as e` inside `pipeline.py`, storing it to `self.model_load_error`, and appending it to the structured response warnings string.
 
 G. **Exact improvements implemented:**
-- **F30**: Removed the dead `np.random.randint` logic block inside `pipeline.py` to ensure pristine codebase layout (non-functional code cleanup, behavior completely preserved).
+- **F30**: Claim: "Output IDs are nondeterministic" was FALSE_OR_UNSUPPORTED. Action: Incidental dead-code cleanup. The unreachable random-ID code was cleaned up to ensure pristine codebase layout (non-functional code cleanup, behavior completely preserved).
 
 H. **Findings intentionally NOT fixed and why:**
 - Finding F1 (CPU Pinning), F6 (OBB), F8 (Video Tracking): Scope mismatch and intentional limitations for the academic baseline.
