@@ -10,20 +10,20 @@
 | 2 | Model Capacity (YOLOv8n) | IMPROVEMENT_OPPORTUNITY | Low | 88% mAP50 recorded. "Poor extraction" is hyperbole for a prototype. | None. |
 | 3 | Severe Training Deficit (3 Epochs) | VALID_LIMITATION | Low | Explicitly documented as a short CPU baseline. Not an algorithmic bug. | None. |
 | 4 | Global Confidence (0.25) | IMPROVEMENT_OPPORTUNITY | Low | Global threshold works but per-class is better. Not a crash or logic defect. | None. |
-| 5 | Missing NMS Tuning | FALSE_OR_UNSUPPORTED | N/A | Ultralytics internal `predict()` applies `iou=0.7` NMS automatically. | None. |
+| 5 | Missing NMS Tuning | FALSE_OR_UNSUPPORTED | N/A | Verified against current library behavior (Ultralytics internal `predict()` applies `iou=0.7` NMS automatically). | None. |
 | 6 | No OBB (Rotated Boxes) | SCOPE_MISMATCH | N/A | Project scope uses standard bounding boxes. | None. |
-| 7 | Color Channel Blindness | FALSE_OR_UNSUPPORTED | N/A | Ultralytics/OpenCV both naturally use BGR natively. | None. |
+| 7 | Color Channel Blindness | FALSE_OR_UNSUPPORTED | N/A | Verified against current library behavior (Ultralytics/OpenCV both handle BGR natively). | None. |
 | 8 | Temporal Smoothing | SCOPE_MISMATCH | N/A | Project verifies static image laboratory setups, not video streams. | None. |
 | 9 | 2D Centroid Fallacy | VALID_LIMITATION | Low | 2D evaluation is the defined scope. Not true 3D estimation. | None. |
 | 10 | Aspect Ratio Distance | VALID_LIMITATION | Low | Standard normalized 2D distance. Not a crash defect. | None. |
 | 11 | Combinatorial Rule Explosion | VALID_LIMITATION | Low | The engine strictly requires *all* instances to pass (README explicitly details this). | None. |
 | 12 | Static Configuration Regions | VALID_LIMITATION | Low | By design, setup specifications enforce fixed zones for fixed camera feeds. | None. |
 | 13 | Rule Short-Circuit Escalation | FALSE_OR_UNSUPPORTED | N/A | `engine.py` increments `rule_violation_count` safely and issues `continue` to the outer rule loop. | None. |
-| 14 | Naive Overlap Logic | FALSE_OR_UNSUPPORTED | N/A | `overlaps` actually calls `BoundingBox.iou(b)`. | None. |
+| 14 | Naive Overlap Logic | FALSE_OR_UNSUPPORTED | N/A | Verified against current implementation (`overlaps` explicitly calls `BoundingBox.iou(b)`). | None. |
 | 15 | Negative Threshold Misclassification | CONFIRMED_DEFECT | High | Config errors surfaced as `MISPLACED_OBJECT` rather than raising `ValueError`. | Fixed. Added validation in `RuleEngine.__init__`. Updated tests. |
 | 16 | Coordinate Zero-Division | FALSE_OR_UNSUPPORTED | N/A | `analyze_image_quality` rejects `img.size == 0` images prior to normalization. | None. |
 | 17 | Blur Detection (Laplacian) | VALID_LIMITATION | Low | High-frequency metric limitations are standard CV limitations. | None. |
-| 18 | Grayscale Conversion Crash on Alpha | FALSE_OR_UNSUPPORTED | N/A | OpenCV's `COLOR_BGR2GRAY` safely ignores the alpha channel on RGBA inputs. | None. |
+| 18 | Grayscale Conversion Crash on Alpha | FALSE_OR_UNSUPPORTED | N/A | Verified against current library behavior (OpenCV `COLOR_BGR2GRAY` safely ignores the alpha channel on RGBA inputs). | None. |
 | 19 | Non-Perceptual Luminance | IMPROVEMENT_OPPORTUNITY | Low | Arithmetic mean is naive but functional for basic thresholds. | None. |
 | 20 | High-Frequency Noise Skew | IMPROVEMENT_OPPORTUNITY | Low | Needs filtering for 4K inputs, but functional on standard resolution. | None. |
 | 21 | Hardcoded Magic Numbers | IMPROVEMENT_OPPORTUNITY | Low | Actually driven by `q_config` mapping. | None. |
