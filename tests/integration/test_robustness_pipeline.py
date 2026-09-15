@@ -81,7 +81,8 @@ def test_robustness_setup_malformed_threshold(dummy_image):
     # Usually we just want to ensure it doesn't crash or return compliant on invalid rule
     # Actually wait, if work_zone is not defined, spatial engine handles missing regions gracefully.
     result = pipeline.run(dummy_image, setup, rules)
-    assert result.compliance_status == "NON_COMPLIANT" # Missing region will cause rule failure, not compliance.
+    assert result.compliance_status == "ERROR"
+    assert result.error == "CONFIGURATION_ERROR"
 
 def test_robustness_multiple_same_objects(dummy_image):
     pipeline = LabLensPipeline()

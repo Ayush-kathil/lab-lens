@@ -43,6 +43,7 @@ class LabLensPipeline:
         self.conf_threshold = conf_threshold
         self.detector = YOLODetector()
         self.model_loaded = False
+        self.model_load_error = None
 
         if model_path and os.path.exists(model_path):
             try:
@@ -51,6 +52,7 @@ class LabLensPipeline:
             except Exception as e:
                 # Do not crash; record that the model failed to load
                 self.model_loaded = False
+                self.model_load_error = str(e)
 
     def run(self, image_path: str, setup_specification: Optional[SetupSpecification] = None, rules: Optional[List[SpatialRule]] = None) -> LabLensResult:
         import time
@@ -111,13 +113,14 @@ class LabLensPipeline:
             )
 
         if not self.model_loaded:
+            err_msg = f"MODEL_NOT_LOADED: {self.model_load_error}" if self.model_load_error else "MODEL_NOT_LOADED"
             return LabLensResult(
                 image_path=image_path,
                 quality=quality_res,
                 detections=[],
                 compliance_status="ERROR",
                 compliance_result=None,
-                warnings=warnings,
+                warnings=warnings + [err_msg] if self.model_load_error else warnings,
                 error="MODEL_NOT_LOADED"
             )
 
@@ -161,7 +164,7 @@ class LabLensPipeline:
                 box=box,
                 class_name=d.class_name,
                 confidence=d.confidence,
-                id=f"{d.class_name}_{d.class_id}" if hasattr(d, 'class_id') else f"{d.class_name}_{np.random.randint(1000)}" # Fallback ID logic
+                id=f"{d.class_name}_{d.class_id}"
             ))
 
         # Enforce unique sequential IDs for duplicated class names
@@ -188,7 +191,20 @@ class LabLensPipeline:
             )
 
         rules = rules or []
-        engine = RuleEngine(setup_specification, rules)
+        try:
+            engine = RuleEngine(setup_specification, rules)
+        except ValueError as ve:
+            timing['total_time'] = time.perf_counter() - t_start
+            return LabLensResult(
+                image_path=image_path,
+                quality=quality_res,
+                detections=spatial_detections,
+                compliance_status="ERROR",
+                compliance_result=None,
+                warnings=warnings + [f"Configuration Error: {str(ve)}"],
+                error="CONFIGURATION_ERROR",
+                timing=timing
+            )
 
         t1 = time.perf_counter()
         timing['spatial_time'] = t1 - t0

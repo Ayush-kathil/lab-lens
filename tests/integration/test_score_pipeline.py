@@ -95,8 +95,8 @@ def test_pipeline_score_f_malformed_setup(dummy_image):
     # Malformed rule: threshold = -1
     rules = [SpatialRule("inside", "Beaker", "work_zone", -1.0)]
     res = pipeline.run(dummy_image, setup, rules)
-    assert res.compliance_status == "NON_COMPLIANT"
-    assert res.compliance_result.score == 50.0
+    assert res.compliance_status == "ERROR"
+    assert res.error == "CONFIGURATION_ERROR"
 
 def test_score_invariants(dummy_image):
     pipeline = LabLensPipeline()

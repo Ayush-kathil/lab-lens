@@ -19,6 +19,9 @@ class RuleEngine:
     def __init__(self, spec: SetupSpecification, rules: List[SpatialRule]):
         self.spec = spec
         self.rules = rules
+        for rule in self.rules:
+            if rule.threshold is not None and rule.threshold < 0:
+                raise ValueError(f"Invalid negative threshold {rule.threshold} for rule {rule.rule_type}")
 
     def evaluate(self, detections: List[DetectionPosition]) -> ComplianceResult:
         violations = []
