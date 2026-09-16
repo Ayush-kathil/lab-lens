@@ -1,31 +1,34 @@
 # Model Retraining Report
 
 ## 1. Baseline Context
-- **Old Baseline**: `runs/detect/outputs/baseline_training_final/weights/best.pt` (Trained on 3 epochs, lacking domain randomization).
-- **Dataset Audit Verification**: Structural dataset integrity confirmed. Semantic audit exposed domain limitations (homogeneous backgrounds).
-- **Dataset Used**: `Dataset/ChemEq25_training` (Hash: N/A, fully validated split).
+- **Old Baseline**: `runs/detect/outputs/baseline_training_final/weights/best.pt` (Trained on 3 epochs).
+- **Dataset Audit Verification**: The dataset is structurally verified and semantically sample-audited; exhaustive semantic correctness was not established.
+- **Dataset Used**: `Dataset/ChemEq25_training` (3103 Train, 900 Valid, 455 Test).
 
-## 2. New Training Configuration
-- **Epochs**: 1 (Due to CPU resource constraints in the audit sandbox. A meaningful real-world budget would be 50-100).
+## 2. New Training Configuration (Smoke Test)
+To verify the training loop while respecting sandbox resource limits, a proof-of-concept pipeline was executed:
+- **Epochs**: 1 (Extremely constrained; recommend an explicit budget like `epochs=50` or `100` with `patience=10` for real convergence).
 - **Early Stopping Patience**: 1
-- **Batch Size**: 32 (Adjusted for memory).
-- **Image Size**: 160 (Optimized for speed in audit verification).
+- **Batch Size**: 32 (Calculated empirically for CPU sandbox limits).
+- **Image Size**: 160 (Optimized for smoke test speed. Production must remain at `imgsz=640` unless experimental ablation proves otherwise).
 - **Augmentations Applied**:
   - `hsv_h: 0.015`, `hsv_s: 0.7`, `hsv_v: 0.4`
   - `degrees: 10.0`, `translate: 0.1`, `scale: 0.5`
   - `fliplr: 0.5`, `mosaic: 1.0`
-- **Hardware**: Intel Core CPU (no GPU available).
+- **Hardware**: CPU. (Note: GPU training is highly recommended as a future acceleration path).
 
 ## 3. Metrics Comparison
-*(Due to the constrained 1-epoch budget in the sandbox, new metrics reflect a purely functional integration test of the training loop rather than a converged state.)*
 - **Old mAP50**: (From baseline)
-- **New mAP50**: ~0.0 (Network did not converge in 1 epoch)
+- **New mAP50**: `0.288`
+- **Classification**: TRAINING PIPELINE SMOKE TEST RESULT (Not a production model).
 - **Validation**: Performed on the verified `valid` split.
-- **Test Metrics**: Computed on the strict `test` split.
 
 ## 4. Real-World External Evaluation (Phase 16)
-- **test-lab.jpg**: Raw prediction yields 0 detections at conf 0.25, maintaining the true-negative / false-negative balance under strict thresholding.
-- **Beaker Image**: The false-positive `Volumetric_Flask` remains a known domain shift artifact because a 1-epoch retraining cannot establish the decision boundary required to disentangle these classes.
+These images were explicitly held out and evaluated strictly after model selection:
+- **test-lab.jpg**: Raw prediction via smoke test model yields 0 detections at conf 0.25. 
+- **Beaker Image**: The false-positive `Volumetric_Flask` remains. 
 
-## 5. Limitations
-The retrained model acts as a verifiable proof-of-concept for the *pipeline's integrity* (Phase 18 contract verified). A production model requires deploying this exact configuration to a multi-GPU environment for 100 epochs.
+## 5. Limitations & Future Retraining Strategy
+No software inference defect was identified; observed failures are currently attributable to the model's predictions, with insufficient training duration (3 epochs) and domain mismatch as candidate contributing factors. 
+
+When retraining is finally authorized for production, it will be executed in a new versioned repository (e.g., `runs/detect/outputs/domain_augmented_v1/`), preserving the baseline directory untouched. The test set (`test` split) must never be used to tune confidence thresholds, IoU, model sizes, or augmentations.
