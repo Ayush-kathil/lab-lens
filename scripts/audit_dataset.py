@@ -108,19 +108,19 @@ for split in splits:
                     aspect_ratio = w / h if h > 0 else 0
                     
                     # Heuristics for Semantic/Wrong-Image Review
-                    if area < 0.001:
+                    if area < AUDIT_BBOX_AREA_MIN:
                         if status == 'VERIFIED':
                             status = 'REVIEW_REQUIRED'
                             reason = f"Tiny bbox area: {area:.4f}"
-                    elif area > 0.95:
+                    elif area > AUDIT_BBOX_AREA_MAX:
                         if status == 'VERIFIED':
                             status = 'REVIEW_REQUIRED'
                             reason = f"Huge bbox area: {area:.4f}"
-                    elif c_name == 'Volumetric_Pipet' and aspect_ratio > 2.0:
+                    elif c_name == 'Volumetric_Pipet' and aspect_ratio > AUDIT_PIPET_ASPECT_MAX:
                         if status == 'VERIFIED':
                             status = 'REVIEW_REQUIRED'
                             reason = f"Suspicious aspect ratio for Pipet: {aspect_ratio:.2f}"
-                    elif c_name == 'Beaker' and aspect_ratio < 0.3:
+                    elif c_name == 'Beaker' and aspect_ratio < AUDIT_BEAKER_ASPECT_MIN:
                         if status == 'VERIFIED':
                             status = 'REVIEW_REQUIRED'
                             reason = f"Suspicious aspect ratio for Beaker: {aspect_ratio:.2f}"
