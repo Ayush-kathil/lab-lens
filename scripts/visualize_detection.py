@@ -9,6 +9,9 @@ def main():
     parser.add_argument("--image", required=True, help="Path to input image")
     parser.add_argument("--model", required=True, help="Path to best.pt")
     parser.add_argument("--outdir", default="outputs/visualizations", help="Output directory")
+    parser.add_argument("--canny-lower", type=int, default=50, help="Lower threshold for Canny edge detection")
+    parser.add_argument("--canny-upper", type=int, default=150, help="Upper threshold for Canny edge detection")
+    parser.add_argument("--aperture-size", type=int, default=3, help="Aperture size for the Sobel operator")
     args = parser.parse_args()
 
     if not os.path.exists(args.image):
@@ -65,7 +68,7 @@ def main():
     print("Running edge detection (Canny)...")
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_blur = cv2.GaussianBlur(img_gray, (5, 5), 0)
-    edges = cv2.Canny(img_blur, 50, 150)
+    edges = cv2.Canny(img_blur, args.canny_lower, args.canny_upper, apertureSize=args.aperture_size)
 
     edge_path = os.path.join(args.outdir, f"{base_name}_edges.jpg")
     cv2.imwrite(edge_path, edges)
