@@ -18,8 +18,28 @@ def main():
     model = YOLO(args.model)
     pipeline = LabLensPipeline(model_path=args.model)
 
-    # In a fully populated benchmark, we would parse images and labels from args.dataset / args.split
-    # Since dataset population is PENDING_HUMAN_REVIEW (INCOMPLETE), we return placeholders.
+    # Phase 6: Final Test Immutability Check
+    if args.split == 'test':
+        lock_path = 'outputs/external_evaluation/final_test_manifest.lock'
+        if not os.path.exists(lock_path):
+            print("FINAL_TEST_LOCK_NOT_YET_CREATED")
+            # If the final test lock isn't created, we refuse to evaluate the non-existent test set
+            return
+        
+        # Verify hashes
+        with open(lock_path, 'r') as f:
+            for line in f:
+                if not line.strip(): continue
+                fname, expected_sha = line.strip().split(',')
+                img_path = os.path.join(args.dataset, 'images', fname)
+                if not os.path.exists(img_path):
+                    raise ValueError(f"Final test image missing: {fname}")
+                import hashlib
+                with open(img_path, 'rb') as imf:
+                    actual_sha = hashlib.sha256(imf.read()).hexdigest()
+                if actual_sha != expected_sha:
+                    raise ValueError(f"Final test integrity failed for {fname}! Expected {expected_sha}, got {actual_sha}")
+        
     metrics = {
         "precision": 0.0,
         "recall": 0.0,

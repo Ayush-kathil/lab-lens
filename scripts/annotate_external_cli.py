@@ -17,12 +17,14 @@ def main():
 
     print("=== ExternalLabBench Human Annotation CLI ===")
     print("Controls:")
-    print("  y - Mark as POSITIVE (Requires BBox annotation)")
+    print("  y - Mark as POSITIVE (Opens ROI selector)")
     print("  n - Mark as NEGATIVE (Empty label file)")
     print("  o - Mark as OUT_OF_TAXONOMY")
     print("  a - Mark as AMBIGUOUS")
     print("  r - Mark as REJECT")
     print("  q - Quit")
+
+    reviewer_name = input("Enter reviewer name: ").strip() or "Unknown"
 
     for row in records:
         if row['ground_truth_status'] != 'PENDING':
@@ -36,7 +38,6 @@ def main():
         if img is None:
             continue
 
-        # Display image
         cv2.imshow('Annotation CLI', img)
         print(f"\nImage: {row['filename']}")
         
@@ -45,14 +46,36 @@ def main():
             if key == ord('y'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
                 row['ground_truth_status'] = 'POSITIVE'
-                # Placeholder for actual bounding box UI
-                print("Marked POSITIVE. Bounding box drawing would trigger here.")
+                row['annotator'] = reviewer_name
+                row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
+                
+                print("Select ROI for POSITIVE object. Press SPACE or ENTER to finish selection, c to cancel.")
+                bbox = cv2.selectROI('Annotation CLI', img, fromCenter=False, showCrosshair=True)
+                if bbox != (0,0,0,0):
+                    cls_id = input("Enter ChemEq25 class ID (0-24): ").strip()
+                    notes = input("Annotation notes: ").strip()
+                    
+                    label_name = os.path.splitext(row['filename'])[0] + '.txt'
+                    label_path = os.path.join('Dataset/ExternalLabBench/labels', label_name)
+                    
+                    # Convert to YOLO format
+                    h, w, _ = img.shape
+                    x, y, bw, bh = bbox
+                    cx = (x + bw/2.0) / w
+                    cy = (y + bh/2.0) / h
+                    nw = bw / w
+                    nh = bh / h
+                    
+                    with open(label_path, 'a') as lf:
+                        lf.write(f"{cls_id} {cx} {cy} {nw} {nh} {notes}\n")
+                    print("Saved bounding box.")
                 break
             elif key == ord('n'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
                 row['ground_truth_status'] = 'NEGATIVE'
+                row['annotator'] = reviewer_name
+                row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
                 
-                # Create empty label file
                 label_name = os.path.splitext(row['filename'])[0] + '.txt'
                 label_path = os.path.join('Dataset/ExternalLabBench/labels', label_name)
                 open(label_path, 'w').close()
@@ -61,36 +84,41 @@ def main():
             elif key == ord('o'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
                 row['ground_truth_status'] = 'OUT_OF_TAXONOMY'
-                print("Marked OUT_OF_TAXONOMY.")
+                row['annotator'] = reviewer_name
                 break
             elif key == ord('a'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
                 row['ground_truth_status'] = 'AMBIGUOUS'
-                print("Marked AMBIGUOUS.")
+                row['annotator'] = reviewer_name
                 break
             elif key == ord('r'):
                 row['annotation_status'] = 'REJECTED'
                 row['ground_truth_status'] = 'REJECT'
-                print("Marked REJECT.")
+                row['annotator'] = reviewer_name
                 break
             elif key == ord('q'):
                 print("Quitting...")
                 cv2.destroyAllWindows()
-                
-                # Save progress
-                with open(manifest_path, 'w', newline='', encoding='utf-8') as f:
-                    writer = csv.DictWriter(f, fieldnames=records[0].keys())
-                    writer.writeheader()
-                    writer.writerows(records)
+                save_manifest(manifest_path, records)
                 return
 
     cv2.destroyAllWindows()
+    save_manifest(manifest_path, records)
+    print("Done reviewing.")
+
+def save_manifest(path, records):
+    if not records: return
+    # Add new fieldnames if they don't exist
+    fieldnames = list(records[0].keys())
+    for new_field in ['annotator', 'annotation_timestamp']:
+        if new_field not in fieldnames:
+            fieldnames.append(new_field)
+            for r in records: r[new_field] = r.get(new_field, '')
     
-    with open(manifest_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=records[0].keys())
+    with open(path, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(records)
-    print("Done reviewing.")
 
 if __name__ == '__main__':
     main()
