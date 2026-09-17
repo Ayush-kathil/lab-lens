@@ -163,7 +163,16 @@ def main():
             val=not args.no_val,
             plots=not args.no_plots,
             save=not args.no_save,
-            cache=args.cache
+            cache=args.cache,
+            patience=config.get('patience', 50),
+            hsv_h=config.get('hsv_h', 0.015),
+            hsv_s=config.get('hsv_s', 0.7),
+            hsv_v=config.get('hsv_v', 0.4),
+            degrees=config.get('degrees', 0.0),
+            translate=config.get('translate', 0.1),
+            scale=config.get('scale', 0.5),
+            fliplr=config.get('fliplr', 0.5),
+            mosaic=config.get('mosaic', 1.0)
         )
         print("\nTraining completed successfully.")
     except Exception as e:

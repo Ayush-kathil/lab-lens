@@ -25,7 +25,7 @@ class YOLODetector(Detector):
         if self.model is None:
             raise RuntimeError("Model is not loaded. Call load_model() first.")
             
-        results = self.model(image, verbose=False)
+        results = self.model(image, conf=conf_threshold, verbose=False)
         detections = []
         
         for result in results:

@@ -127,7 +127,7 @@ class LabLensPipeline:
         # 2. Detection
         t0 = time.perf_counter()
         try:
-            detections = self.detector.predict(img)
+            detections = self.detector.predict(img, conf_threshold=self.conf_threshold)
         except Exception as e:
             return LabLensResult(
                 image_path=image_path,

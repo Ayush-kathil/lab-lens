@@ -1,0 +1,30 @@
+path: C:\Users\shiva\OneDrive\Documents\GitHub\Lab-lens\Dataset\ChemEq25_training_verified_final
+train: train/images
+val: valid/images
+test: test/images
+names:
+  0: Beaker
+  1: Buchner_Funnel
+  2: Burette_Stands
+  3: Calorimeter
+  4: Conical_Flask
+  5: Funnel
+  6: Glass_Rod
+  7: Measuring_Cylinder
+  8: Mechanical_Balance_Scale
+  9: Nessler_Reagent_Bottle
+  10: Pipette
+  11: Porcelain_Mortar_Pestle
+  12: Precision_Weight_Scale
+  13: Reagent_Bottle
+  14: Round_Bottom_Flask_Borosilicate_Glass_1_Neck
+  15: Round_Bottom_Flask_Borosilicate_Glass_2_Neck
+  16: Round_Bottom_Flask_Borosilicate_Glass_3_Neck
+  17: Separating_Funnel
+  18: Spirit_Lamp
+  19: TestTube_Holder
+  20: Test_Tube
+  21: Volumetric_Flask
+  22: Volumetric_Pipet
+  23: Wash_Bottle
+  24: Weighing_Bottle
