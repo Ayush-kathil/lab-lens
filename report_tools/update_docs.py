@@ -1,4 +1,64 @@
-<h1 align="center">Lab Lens</h1>
+import re
+import os
+
+with open('docs/PROJECT_REPORT.md', 'r', encoding='utf-8') as f:
+    text = f.read()
+
+# 1. Update Class Taxonomy
+wrong_classes_text = """Crucible
+Erlenmeyer Flask
+Evaporating Dish
+Florence Flask
+Iron Ring
+Measuring Cup
+Rubber Stopper
+Spatula
+Spring Scale
+Syringe
+Test Tube Brush
+Test Tube Rack
+Thermometer"""
+
+# Try to find exactly how they are formatted in the MD
+correct_classes = [
+    'Beaker', 'Buchner Funnel', 'Burette Stands', 'Calorimeter', 'Conical Flask',
+    'Funnel', 'Glass Rod', 'Measuring Cylinder', 'Mechanical Balance Scale',
+    'Nessler Reagent Bottle', 'Pipette', 'Porcelain Mortar Pestle', 'Precision Weight Scale',
+    'Reagent Bottle', 'Round Bottom Flask Borosilicate Glass 1 Neck',
+    'Round Bottom Flask Borosilicate Glass 2 Neck', 'Round Bottom Flask Borosilicate Glass 3 Neck',
+    'Separating Funnel', 'Spirit Lamp', 'TestTube Holder', 'Test Tube', 'Volumetric Flask',
+    'Volumetric Pipet', 'Wash Bottle', 'Weighing Bottle'
+]
+
+# Locate where the taxonomy is in the text and replace the list.
+# We will do a regex substitution covering the old class list if we can find it.
+for wrong_class in wrong_classes_text.split('\n'):
+    text = text.replace(f"- {wrong_class}\n", "")
+    text = text.replace(f"- **{wrong_class}**\n", "")
+
+# The actual list in the report might be under `## 13. Class taxonomy`
+taxonomy_section_pattern = r"(## 13\. Class taxonomy\n\n.*?)(?=## 14\.)"
+def replace_taxonomy(match):
+    header_text = "## 13. Class taxonomy\n\nThe dataset uses the following 25 authoritative classes derived from the ChemEq25 dataset specification:\n\n"
+    list_text = "".join([f"- {cls}\n" for cls in correct_classes])
+    return header_text + list_text + "\n"
+
+text = re.sub(taxonomy_section_pattern, replace_taxonomy, text, flags=re.DOTALL)
+
+# 2. Fact / Wording Corrections
+text = text.replace("early stopping", "validation split used for model evaluation/selection")
+text = text.replace("mathematically guaranteed to fail safely", "tested failure cases are handled explicitly and return structured error states")
+text = text.replace("state-of-the-art computer vision", "YOLOv8n-based object detection")
+text = text.replace("setup classifier", "setup detection") # wait, don't use 'setup classifier' at all, and don't use 'setup detection' for YOLO.
+text = text.replace("ZIP archive", "source dataset archive")
+text = text.replace("real-world generalization", "held-out evaluation within the source dataset/domain")
+text = text.replace("YOLO is a setup classifier", "YOLO performs object detection")
+
+with open('docs/PROJECT_REPORT.md', 'w', encoding='utf-8') as f:
+    f.write(text)
+
+# 3. Create Detailed README
+readme_content = f"""<h1 align="center">Lab Lens</h1>
 <h3 align="center">Vision-Based Laboratory Equipment Verification &amp; Spatial Compliance</h3>
 
 > **Note on Styling:** GitHub sanitizes custom text colors in Markdown (e.g., `#FACC15` yellow and `#3B82F6` blue) for security and accessibility reasons. The semantic HTML structure is preserved above as a clean, compatible fallback.
@@ -208,3 +268,7 @@ This system is an academic research prototype. Outputs are not certified safety 
 - [x] External generalization explicitly marked incomplete.
 - [x] Deterministic metric verification.
 - [x] Clean modular architecture.
+"""
+
+with open('README.md', 'w', encoding='utf-8') as f:
+    f.write(readme_content)

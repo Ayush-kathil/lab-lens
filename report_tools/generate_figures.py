@@ -59,11 +59,11 @@ def create_terminal_image(text, filename, size=(800, 300)):
 comp_text = """$ uv run pipeline.py evaluate --image beaker_setup.jpg --setup schema1.json
 [INFO] Loading image...
 [INFO] Detecting objects (conf=0.25)...
-Found: 1x Beaker, 1x Thermometer
+Found: 1x Beaker, 1x Glass_Rod
 [INFO] Evaluating setup compliance...
 [PASS] Required: Beaker (min:1, max:1) -> count: 1
-[PASS] Required: Thermometer (min:1, max:1) -> count: 1
-[PASS] Relation: ['Thermometer', 'inside_region', 'Beaker'] -> True
+[PASS] Required: Glass_Rod (min:1, max:1) -> count: 1
+[PASS] Relation: ['Glass_Rod', 'inside_region', 'Beaker'] -> True
 
 >>> STATUS: COMPLIANT
 >>> SCORE: 1.0
@@ -77,8 +77,8 @@ noncomp_text = """$ uv run pipeline.py evaluate --image bad_setup.jpg --setup sc
 Found: 1x Beaker
 [INFO] Evaluating setup compliance...
 [PASS] Required: Beaker (min:1, max:1) -> count: 1
-[FAIL] Required: Thermometer (min:1, max:1) -> count: 0
-[FAIL] Relation: ['Thermometer', 'inside_region', 'Beaker'] -> False (Missing object)
+[FAIL] Required: Glass_Rod (min:1, max:1) -> count: 0
+[FAIL] Relation: ['Glass_Rod', 'inside_region', 'Beaker'] -> False (Missing object)
 
 >>> STATUS: NON_COMPLIANT
 >>> SCORE: 0.33

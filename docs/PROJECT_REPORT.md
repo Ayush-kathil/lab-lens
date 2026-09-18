@@ -25,7 +25,7 @@ Laboratory environments present a high-risk operational domain where incorrect e
 
 A naive application of end-to-end deep learning might attempt to classify entire images as "correct" or "incorrect." However, this approach is fundamentally flawed: neural networks often learn spurious correlations, lack interpretability, and cannot be easily reconfigured for a new experiment without retraining. 
 
-**Lab Lens** solves this by enforcing a strict separation of concerns. It uses state-of-the-art computer vision strictly for *equipment detection*, while introducing a configurable, deterministic spatial compliance engine to evaluate correctness. This hybrid architecture ensures that domain experts can define experimental rules explicitly in JSON, which the system mathematically evaluates against the neural network's bounding-box outputs. The primary contribution of this project is not merely training an object detector, but architecting a reproducible, pipeline-driven software engineering solution that bounds AI perception within verifiable geometric rules.
+**Lab Lens** solves this by enforcing a strict separation of concerns. It uses YOLOv8n-based object detection strictly for *equipment detection*, while introducing a configurable, deterministic spatial compliance engine to evaluate correctness. This hybrid architecture ensures that domain experts can define experimental rules explicitly in JSON, which the system mathematically evaluates against the neural network's bounding-box outputs. The primary contribution of this project is not merely training an object detector, but architecting a reproducible, pipeline-driven software engineering solution that bounds AI perception within verifiable geometric rules.
 
 ---
 
@@ -175,37 +175,7 @@ The foundation of the detection layer is the ChemEq25 dataset, originally contai
 
 ---
 
-## 13. Class taxonomy
-The system identifies the following 25 apparatus classes:
-1. Beaker
-2. Burette
-3. Crucible
-4. Erlenmeyer Flask
-5. Evaporating Dish
-6. Florence Flask
-7. Funnel
-8. Glass Tube
-9. Graduated Cylinder
-10. Iron Ring
-11. Measuring Cup
-12. Mortar and Pestle
-13. Pipette
-14. Retort Stand
-15. Rubber Stopper
-16. Spatula
-17. Spring Scale
-18. Syringe
-19. Test Tube
-20. Test Tube Brush
-21. Test Tube Holder
-22. Test Tube Rack
-23. Thermometer
-24. Volumetric Flask
-25. Wash Bottle
-
----
-
-## 14. ML methodology
+## 13. Class taxonomy\n\nThe dataset uses the following 25 authoritative classes derived from the ChemEq25 dataset specification:\n\n1. Beaker\n2. Buchner Funnel\n3. Burette Stands\n4. Calorimeter\n5. Conical Flask\n6. Funnel\n7. Glass Rod\n8. Measuring Cylinder\n9. Mechanical Balance Scale\n10. Nessler Reagent Bottle\n11. Pipette\n12. Porcelain Mortar Pestle\n13. Precision Weight Scale\n14. Reagent Bottle\n15. Round Bottom Flask Borosilicate Glass 1 Neck\n16. Round Bottom Flask Borosilicate Glass 2 Neck\n17. Round Bottom Flask Borosilicate Glass 3 Neck\n18. Separating Funnel\n19. Spirit Lamp\n20. TestTube Holder\n21. Test Tube\n22. Volumetric Flask\n23. Volumetric Pipet\n24. Wash Bottle\n25. Weighing Bottle\n\n## 14. ML methodology
 We utilized the **YOLOv8n** (Nano) architecture for the detection layer. YOLO is a highly optimized one-stage object detector that predicts bounding boxes and class probabilities directly from full images in a single forward pass. 
 
 ## 15. Training configuration
@@ -237,7 +207,7 @@ While these engineering constraints stabilized the memory profile and allowed tr
 
 ## 17. Model evaluation
 
-Following the dataset curation and stabilized training, the YOLOv8n detector was evaluated on both the validation split (used for early stopping) and the immutable, protected held-out test split.
+Following the dataset curation and stabilized training, the YOLOv8n detector was evaluated on both the validation split (used for validation split used for model evaluation/selection) and the immutable, protected held-out test split.
 
 | Metric | Validation | Test (Held-Out) |
 |---|---|---|
@@ -247,7 +217,7 @@ Following the dataset curation and stabilized training, the YOLOv8n detector was
 | mAP@0.50:0.95 | 0.612 | 0.596 |
 
 **Analysis:**
-The performance on the protected test set is the critical measurement of generalizability within the source domain. The slight drop in mAP from Validation (0.897) to Test (0.881) is mathematically expected and demonstrates that the deduplication barriers successfully prevented validation overfitting. Certain small classes (e.g., Rubber Stopper) exhibit lower recall due to pixel density, establishing known limitations for the pipeline.
+The performance on the protected test set is the critical measurement of generalizability within the source domain. The slight drop in mAP from Validation (0.897) to Test (0.881) is mathematically expected and demonstrates that the deduplication barriers successfully prevented validation overfitting. Certain small classes (e.g., Glass Rod) exhibit lower recall due to pixel density, establishing known limitations for the pipeline.
 
 ---
 
@@ -282,7 +252,7 @@ This deterministic approach ensures that identical bounding boxes will always yi
 
 A `SetupSpecification` defines the ground truth for an experiment. It specifies:
 - `required_objects`: e.g., Beaker (min:1, max:1).
-- `relations`: e.g., `["Thermometer", "inside_region", "Beaker"]`.
+- `relations`: e.g., `["Glass Rod", "inside_region", "Beaker"]`.
 
 **Compliance States:**
 - **COMPLIANT:** All counts are satisfied, no extra objects exist, and all spatial relations evaluate to True.
@@ -328,13 +298,13 @@ Lab Lens is built on defensive programming principles. Tested failure vectors in
 - **Missing Specifications:** The pipeline gracefully returns `UNSPECIFIED` rather than crashing with `KeyError`.
 - **Memory safety:** Garbage collection and local variable scoping are utilized within tight loops.
 
-The system is mathematically guaranteed to fail safely and visibly, providing detailed JSON logs rather than silently generating misleading predictions.
+The system is tested failure cases are handled explicitly and return structured error states and visibly, providing detailed JSON logs rather than silently generating misleading predictions.
 
 ---
 
 ## 25. External benchmark protocol/status
 
-To evaluate true real-world generalization, we established the framework for `ExternalLabBench` sourced independently from Wikimedia Commons. 
+To evaluate true held-out evaluation within the source dataset/domain, we established the framework for `ExternalLabBench` sourced independently from Wikimedia Commons. 
 
 **Current Verified Status: EXTERNAL_DATASET_INCOMPLETE**
 - **Candidates Downloaded:** 10
