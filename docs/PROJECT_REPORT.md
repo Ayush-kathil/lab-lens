@@ -21,7 +21,7 @@ Trained on a rigorously audited subset of the ChemEq25 dataset (Train: 2891, Val
 ---
 
 ## 3. INTRODUCTION
-Laboratory environments present a high-risk operational domain where incorrect equipment setup can lead to failed experiments, ruined reagents, or safety hazards. In educational environments, manually verifying every student's setup does not scale with class size. While modern computer vision has successfully automated object recognition, evaluating a laboratory setup requires reasoning about the *relationships* between objects (e.g., "Is the thermometer inside the beaker?"). 
+Laboratory environments present a high-risk operational domain where incorrect equipment setup can lead to failed experiments, ruined reagents, or safety hazards. In educational environments, manually verifying every student's setup does not scale with class size. While modern computer vision has successfully automated object recognition, evaluating a laboratory setup requires reasoning about the *relationships* between objects (e.g., "Is the Glass Rod inside the Beaker?"). 
 
 A naive application of end-to-end deep learning might attempt to classify entire images as "correct" or "incorrect." However, this approach is fundamentally flawed: neural networks often learn spurious correlations, lack interpretability, and cannot be easily reconfigured for a new experiment without retraining. 
 
