@@ -1,4 +1,5 @@
-<h1 align="center">Lab Lens</h1>
+def rewrite_readme():
+    content = """<h1 align="center">Lab Lens</h1>
 <h3 align="center">Vision-Based Laboratory Equipment Verification &amp; Spatial Compliance</h3>
 
 > **Note on Styling:** GitHub sanitizes custom text colors in Markdown (e.g., `#FACC15` yellow and `#3B82F6` blue) for security and accessibility reasons. The semantic HTML structure is preserved above as a clean, compatible fallback.
@@ -154,3 +155,9 @@ This system is an academic research prototype. Condition coverage scores are not
 - [x] External generalization explicitly marked incomplete.
 - [x] Modular codebase.
 - [x] Verified metrics.
+"""
+    with open('README.md', 'w', encoding='utf-8') as f:
+        f.write(content)
+
+if __name__ == '__main__':
+    rewrite_readme()
