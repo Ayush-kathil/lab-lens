@@ -116,3 +116,8 @@ outputs/
 .env.*.local
 *.pem
 secrets/
+
+!docs/figures/*.png
+!docs/figures/*.jpg
+!docs/overleaf_figures/*.png
+!docs/overleaf_figures/*.jpg
