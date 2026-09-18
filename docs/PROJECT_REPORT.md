@@ -398,7 +398,7 @@ We engineered a bespoke OpenCV-based CLI tool (`scripts/annotate_external_cli.py
 | Decision | Alternative | Reason | Consequence |
 |---|---|---|---|
 | **YOLOv8n** | Two-stage detectors (e.g., Faster R-CNN) | Speed and lightweight deployment on CPU environments. | Minor loss in precision on highly occluded micro-objects. |
-| **Rule Engine** | Learned Setup Classifier | Neural networks lack interpretability and configurability for safety rules. | Highly robust, configurable, but requires explicit specification authoring. |
+| **Rule Engine** | Learned Experiment Recognizer | Neural networks lack interpretability and configurability for safety rules. | Highly robust, configurable, but requires explicit specification authoring. |
 | **JSONL Annotations** | Standard YOLO txt | JSONL allows embedding reviewer metadata and complex taxonomy states. | Requires custom adapter scripts. |
 | **Quarantine Data** | Silently relabel ambiguous boxes | Preserves ground-truth integrity and scientific honesty. | Slight reduction in total training volume. |
 
@@ -425,7 +425,7 @@ Data integrity is enforced cryptographically. The `Dataset/ChemEq25_training_ver
 
 We explicitly acknowledge the following project limitations:
 - **External Benchmark Incomplete:** Real-world generalization metrics cannot be claimed until the `ExternalLabBench` undergoes human annotation.
-- **Not a Setup Classifier:** ChemEq25 is purely an object detection dataset. Setup compliance requires the user to manually configure the rules.
+- **Not a Learned Experiment Recognizer:** ChemEq25 is purely an object detection dataset. Setup compliance requires the user to manually configure the rules.
 - **No Semantic Chemistry:** The system calculates spatial overlaps; it does not know if a beaker is filled with a hazardous chemical versus water.
 - **Silver Labels:** Current real-world integration pipelines use unverified silver labels strictly for mechanical pipeline testing.
 
