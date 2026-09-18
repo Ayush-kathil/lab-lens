@@ -51,7 +51,7 @@ The measurable technical objectives of Lab Lens are to:
 
 ---
 
-## 6. SCOPE AND LIMITATIONS
+## 6. Scope
 
 ### IN SCOPE
 - Detection of 25 specified laboratory equipment classes.
@@ -69,9 +69,7 @@ The measurable technical objectives of Lab Lens are to:
 
 ---
 
-## 7. REQUIREMENTS ANALYSIS
-
-### Functional Requirements
+## 7. Functional requirements
 | ID | Requirement | Description |
 |---|---|---|
 | FR1 | Image Input | The system must accept standard RGB images (JPEG, PNG). |
@@ -82,7 +80,7 @@ The measurable technical objectives of Lab Lens are to:
 | FR6 | Compliance Reporting | The system must output COMPLIANT, NON_COMPLIANT, UNSPECIFIED, AMBIGUOUS, or ERROR states. |
 | FR7 | Structured Reporting | The pipeline must serialize the entire evaluation tree into JSON. |
 
-### Non-Functional Requirements
+## 8. Non-functional requirements
 | ID | Requirement | Description |
 |---|---|---|
 | NFR1 | Reliability | The pipeline must fail safely on invalid inputs without crashing. |
@@ -94,7 +92,7 @@ The measurable technical objectives of Lab Lens are to:
 
 ---
 
-## 8. SYSTEM ARCHITECTURE
+## 9. Architecture/design
 
 The Lab Lens architecture follows a strict, unidirectional data flow separating the non-deterministic perception layer from the deterministic reasoning layer.
 
@@ -123,7 +121,7 @@ graph TD
 
 ---
 
-## 9. SYSTEM WORKFLOW
+## 10. Workflow
 
 The workflow tracks the lifecycle of an evaluation request, emphasizing early-exit failure paths to ensure robustness.
 
@@ -154,10 +152,10 @@ sequenceDiagram
 
 ---
 
-## 10. DATASET ENGINEERING
-
+## 11. Dataset description
 The foundation of the detection layer is the ChemEq25 dataset, originally containing 25 classes of laboratory equipment. However, deep forensic investigation revealed severe data integrity issues that required extensive engineering before it could be used.
 
+## 12. Dataset engineering/cleaning
 **Investigations & Corrections:**
 - **Local Extraction Corruption:** The original zip archives contained malformed DOS 8.3 short filenames that caused extraction failures and mismatched label files across Windows environments.
 - **Malformed Annotations:** Several labels were completely empty or contained malformed bounding box formats.
@@ -177,7 +175,7 @@ The foundation of the detection layer is the ChemEq25 dataset, originally contai
 
 ---
 
-## 11. CLASS TAXONOMY
+## 13. Class taxonomy
 The system identifies the following 25 apparatus classes:
 1. Beaker
 2. Burette
@@ -207,10 +205,10 @@ The system identifies the following 25 apparatus classes:
 
 ---
 
-## 12. MACHINE LEARNING APPROACH
-
+## 14. ML methodology
 We utilized the **YOLOv8n** (Nano) architecture for the detection layer. YOLO is a highly optimized one-stage object detector that predicts bounding boxes and class probabilities directly from full images in a single forward pass. 
 
+## 15. Training configuration
 **Hyperparameters and Decisions:**
 - **Pretrained Weights:** We utilized transfer learning, initializing from COCO-pretrained weights to leverage low-level feature extraction capabilities.
 - **Image Size:** 640x640, balancing computational constraints with sufficient resolution for small objects (e.g., rubber stoppers).
@@ -223,7 +221,7 @@ Crucially, the ML layer is intentionally oblivious to the concept of an "experim
 
 ---
 
-## 13. TRAINING ENGINEERING AND OOM INVESTIGATION
+## 16. OOM/memory investigation
 
 During local CPU training, the pipeline encountered catastrophic Out-Of-Memory (OOM) failures. A forensic profiling investigation revealed severe intra-epoch Resident Set Size (RSS) growth, where memory consumption escalated relentlessly during the dataloader worker processes.
 
@@ -237,7 +235,7 @@ While these engineering constraints stabilized the memory profile and allowed tr
 
 ---
 
-## 14. MODEL EVALUATION
+## 17. Model evaluation
 
 Following the dataset curation and stabilized training, the YOLOv8n detector was evaluated on both the validation split (used for early stopping) and the immutable, protected held-out test split.
 
@@ -253,7 +251,7 @@ The performance on the protected test set is the critical measurement of general
 
 ---
 
-## 15. DETECTION THRESHOLD REGRESSION BUG
+## 18. Confidence-threshold regression bug
 
 During end-to-end integration testing, a severe behavioral discrepancy was identified: direct invocations of the Ultralytics model yielded different results than the `LabLensPipeline` when tested on identical images.
 
@@ -265,7 +263,7 @@ The bug was patched by strictly forwarding `conf=conf_threshold` into the ML lay
 
 ---
 
-## 16. SPATIAL REASONING
+## 19. Spatial reasoning
 
 The spatial reasoning engine converts raw coordinates into abstract geometric relations. The `BoundingBox` class normalizes coordinates to $[0.0, 1.0]$. 
 
@@ -280,7 +278,7 @@ This deterministic approach ensures that identical bounding boxes will always yi
 
 ---
 
-## 17. RULE-BASED COMPLIANCE
+## 20. Rule-based compliance
 
 A `SetupSpecification` defines the ground truth for an experiment. It specifies:
 - `required_objects`: e.g., Beaker (min:1, max:1).
@@ -298,7 +296,7 @@ If no explicit conditions exist, the score is explicitly skipped to prevent divi
 
 ---
 
-## 18. SYNTHETIC SPATIAL VALIDATION
+## 21. Synthetic spatial validation
 
 To rigorously verify the rule engine independently of the YOLO model, we engineered a suite of 21 canonical synthetic fixtures. These fixtures provide hardcoded bounding boxes mathematically crafted to trigger specific edge cases (e.g., exact boundary overlap, missing objects, extra objects, inverted Cartesian coordinates).
 
@@ -306,13 +304,13 @@ Integration testing against these fixtures guarantees that the `LabLensPipeline`
 
 ---
 
-## 19. REAL-WORLD SPATIAL/PIPELINE VALIDATION
+## 22. Real-world pipeline validation
 
 The system contains an integration scaffolding for `Dataset/SpatialComplianceReal`, allowing end-to-end testing on real images. Currently, these images utilize AI-generated silver labels to test the ingestion pathways. It must be explicitly noted that the human verification count for these silver labels is zero; they serve exclusively to validate that the engineering pipeline can successfully deserialize JSON payloads and stream them into the rule engine without crashing.
 
 ---
 
-## 20. END-TO-END PIPELINE
+## 23. End-to-end pipeline
 
 The `LabLensPipeline.run` method orchestrates the entire workflow. It outputs a comprehensive JSON payload containing metadata, raw detections, rule evaluations, missing/extra object lists, and the final compliance score. A human-readable CLI reporter consumes this JSON to print color-coded terminal summaries.
 
@@ -322,7 +320,7 @@ The `LabLensPipeline.run` method orchestrates the entire workflow. It outputs a 
 
 ---
 
-## 21. ROBUSTNESS AND ERROR HANDLING
+## 24. Robustness/error handling
 
 Lab Lens is built on defensive programming principles. Tested failure vectors include:
 - **Unreadable images:** Safely caught via `cv2.imread` None-checks.
@@ -334,7 +332,7 @@ The system is mathematically guaranteed to fail safely and visibly, providing de
 
 ---
 
-## 22. EXTERNAL LAB BENCHMARK
+## 25. External benchmark protocol/status
 
 To evaluate true real-world generalization, we established the framework for `ExternalLabBench` sourced independently from Wikimedia Commons. 
 
@@ -351,7 +349,7 @@ Because automated ML labels are strictly forbidden from acting as ground truth, 
 
 ---
 
-## 23. HUMAN ANNOTATION PROTOCOL
+## 26. Human annotation protocol
 
 We engineered a bespoke OpenCV-based CLI tool (`scripts/annotate_external_cli.py`) to facilitate human review of the external benchmark. 
 **Protocol Rules:**
@@ -361,7 +359,7 @@ We engineered a bespoke OpenCV-based CLI tool (`scripts/annotate_external_cli.py
 
 ---
 
-## 24. RESULTS SUMMARY
+## 27. Results summary
 
 *The following table consolidates only verified, scientifically established results.*
 
@@ -377,7 +375,7 @@ We engineered a bespoke OpenCV-based CLI tool (`scripts/annotate_external_cli.py
 
 ---
 
-## 25. ENGINEERING CHALLENGES
+## 28. Engineering challenges
 
 **Duplicate Leakage:**
 *Problem:* Standard open-source datasets frequently suffer from train/test contamination.
@@ -395,7 +393,7 @@ We engineered a bespoke OpenCV-based CLI tool (`scripts/annotate_external_cli.py
 
 ---
 
-## 26. DESIGN DECISIONS AND TRADE-OFFS
+## 29. Design decisions/trade-offs
 
 | Decision | Alternative | Reason | Consequence |
 |---|---|---|---|
@@ -406,7 +404,7 @@ We engineered a bespoke OpenCV-based CLI tool (`scripts/annotate_external_cli.py
 
 ---
 
-## 27. TESTING STRATEGY
+## 30. Testing strategy
 
 The project relies on a comprehensive, hierarchical `pytest` infrastructure:
 - **Unit Tests:** Isolate bounding box mathematics, geometry calculations, and JSON parsing.
@@ -417,13 +415,13 @@ The project relies on a comprehensive, hierarchical `pytest` infrastructure:
 
 ---
 
-## 28. SECURITY / DATA INTEGRITY / REPRODUCIBILITY
+## 31. Security/data integrity/reproducibility
 
 Data integrity is enforced cryptographically. The `Dataset/ChemEq25_training_verified_final` split and the protected test set are validated via explicit SHA-256 manifest checks. The system strictly disables the automatic fabrication of ground truth data, ensuring that evaluation metrics are never polluted by model hallucinations. Furthermore, PyTorch random seeds are fixed, and the entire pipeline is version-controlled via Git to guarantee reproducible research outputs.
 
 ---
 
-## 29. LIMITATIONS
+## 32. Limitations
 
 We explicitly acknowledge the following project limitations:
 - **External Benchmark Incomplete:** Real-world generalization metrics cannot be claimed until the `ExternalLabBench` undergoes human annotation.
@@ -433,7 +431,7 @@ We explicitly acknowledge the following project limitations:
 
 ---
 
-## 30. FUTURE WORK
+## 33. Future work
 
 Future development should prioritize:
 1. **Completing the External Benchmark:** Utilizing the `annotate_external_cli.py` to finalize human review of the 10 candidates, followed by expanding the pool to 50-100 images with hard-negative mining.
@@ -442,13 +440,13 @@ Future development should prioritize:
 
 ---
 
-## 31. CONCLUSION
+## 34. Conclusion
 
 The **Lab Lens** project successfully demonstrates a highly engineered, robust pipeline for "laboratory equipment detection and configurable rule-based spatial compliance." By strictly isolating the YOLOv8n perception layer from the deterministic geometric rule engine, the system ensures interpretability, safety, and configurability. While the baseline detector achieves strong intra-domain performance (mAP@0.50 of 0.881), the project's foremost achievement is its rigorous software engineering methodology—evidenced by thorough data deduplication, safety-first error handling, and the honest, verifiable staging of the currently incomplete external generalization benchmark. 
 
 ---
 
-## 32. REFERENCES
+## 35. References
 1. Ultralytics. (2023). YOLOv8 Documentation.
 2. ChemEq25 Dataset Source Documentation (Referenced within `docs/REPORT_REFERENCES.md`).
 3. Project Repository (`Ayush-kathil/lab-lens`).

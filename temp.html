@@ -1,0 +1,510 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: 'Times New Roman', serif; margin: 40px; font-size: 16px; line-height: 1.6; }
+h1, h2, h3 { font-family: 'Arial', sans-serif; page-break-after: avoid; }
+h1 { font-size: 24px; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
+h2 { font-size: 20px; }
+table { border-collapse: collapse; width: 100%; margin-bottom: 20px; page-break-inside: avoid; }
+th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
+th { padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #f2f2f2; }
+p, li { page-break-inside: avoid; }
+pre { background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; overflow-x: auto; font-family: Consolas, monospace; }
+</style>
+</head>
+<body>
+<h1>Lab Lens</h1>
+<h2>Vision-Based Laboratory Equipment Verification and Spatial Compliance</h2>
+<p><strong>Academic Project Report</strong></p>
+<hr />
+<h2>1. COVER PAGE</h2>
+<p><strong>Project Title:</strong> Lab Lens<br />
+<strong>Subtitle:</strong> Vision-Based Laboratory Equipment Verification and Spatial Compliance<br />
+<strong>Institution:</strong> Academic Project (Independent Technical Implementation)<br />
+<em>(Note: Personal registration details, course information, and academic year are maintained in the canonical institutional submission portal and are omitted here for blind review integrity).</em></p>
+<hr />
+<h2>2. ABSTRACT</h2>
+<p>The verification of laboratory experimental setups is a critical safety and educational requirement, traditionally bottlenecked by manual inspection. This project introduces <strong>Lab Lens</strong>, a hybrid vision-based system for laboratory equipment detection and configurable rule-based spatial compliance. The architecture explicitly decouples perception from logical reasoning: a YOLOv8n convolutional neural network performs object detection (identifying 25 classes of chemical apparatus), while a deterministic, symbolic rule engine evaluates the spatial relationships between detected objects against an explicit configuration schema. </p>
+<p>Trained on a rigorously audited subset of the ChemEq25 dataset (Train: 2891, Valid: 878, Test: 455), the detector achieves a held-out test mAP@0.50 of 0.881. However, rather than forcing the neural network to implicitly learn the concept of a "correct experiment," Lab Lens relies on geometric bounding-box invariants (e.g., <em>above</em>, <em>inside_region</em>, <em>overlaps</em>) to compute deterministic compliance scores. This report details the dataset forensics, the architectural separation of concerns, mitigation of severe memory-growth anomalies during CPU training, and the scaffolding of an independent external benchmark (<code>ExternalLabBench</code>) which currently holds 10 rigorously audited candidates pending human annotation. Ultimately, the system demonstrates that combining deep learning for perception with explicit rule engines for compliance yields a highly robust, interpretable, and reproducible evaluation pipeline.</p>
+<hr />
+<h2>3. INTRODUCTION</h2>
+<p>Laboratory environments present a high-risk operational domain where incorrect equipment setup can lead to failed experiments, ruined reagents, or safety hazards. In educational environments, manually verifying every student's setup does not scale with class size. While modern computer vision has successfully automated object recognition, evaluating a laboratory setup requires reasoning about the <em>relationships</em> between objects (e.g., "Is the thermometer inside the beaker?"). </p>
+<p>A naive application of end-to-end deep learning might attempt to classify entire images as "correct" or "incorrect." However, this approach is fundamentally flawed: neural networks often learn spurious correlations, lack interpretability, and cannot be easily reconfigured for a new experiment without retraining. </p>
+<p><strong>Lab Lens</strong> solves this by enforcing a strict separation of concerns. It uses state-of-the-art computer vision strictly for <em>equipment detection</em>, while introducing a configurable, deterministic spatial compliance engine to evaluate correctness. This hybrid architecture ensures that domain experts can define experimental rules explicitly in JSON, which the system mathematically evaluates against the neural network's bounding-box outputs. The primary contribution of this project is not merely training an object detector, but architecting a reproducible, pipeline-driven software engineering solution that bounds AI perception within verifiable geometric rules.</p>
+<hr />
+<h2>4. PROBLEM STATEMENT</h2>
+<p><strong>Precise Definition:</strong> Given an RGB image of a laboratory workbench and a structured JSON configuration defining the required apparatus and their spatial relationships, the system must accurately localize all relevant equipment and deterministically calculate a setup compliance score based on explicit geometric rules.</p>
+<p><strong>Practical Context:</strong> Laboratory instructors and automated safety systems need immediate, interpretable feedback on benchtop configurations.</p>
+<p><strong>Technical Challenge:</strong> Object detectors suffer from false positives, bounding box jitter, and domain shift. Furthermore, computing relationships like "inside" or "supported by" from 2D bounding boxes requires robust normalization and invariant geometric logic to prevent cascading failures in the compliance calculation.</p>
+<p><strong>Project Scope:</strong> The project encompasses dataset engineering, model training, pipeline construction, spatial rule evaluation, and robust JSON/CLI reporting.</p>
+<hr />
+<h2>5. OBJECTIVES</h2>
+<p>The measurable technical objectives of Lab Lens are to:
+1. <strong>Detect Laboratory Equipment:</strong> Localize and classify 25 distinct types of laboratory apparatus using a one-stage object detector.
+2. <strong>Normalize Detections:</strong> Translate raw neural network outputs into normalized geometric representations robust to image scaling.
+3. <strong>Reason Over Spatial Relationships:</strong> Compute pairwise spatial relationships (left/right, above/below, inside, overlaps) using deterministic mathematics.
+4. <strong>Evaluate Configurable Compliance Rules:</strong> Parse a <code>SetupSpecification</code> and grade the normalized detections against required counts and relationships.
+5. <strong>Generate Machine-Readable Results:</strong> Output structured JSON compliance reports for downstream integration.
+6. <strong>Provide Deterministic Behavior:</strong> Ensure the pipeline fails safely, handles exceptions gracefully, and produces 100% reproducible compliance scores for a given set of detections.</p>
+<hr />
+<h2>6. Scope</h2>
+<h3>IN SCOPE</h3>
+<ul>
+<li>Detection of 25 specified laboratory equipment classes.</li>
+<li>Spatial relationship reasoning using 2D bounding boxes.</li>
+<li>Configurable compliance rules defined via JSON specifications.</li>
+<li>Comprehensive JSON and CLI reporting.</li>
+<li>Robustness mechanisms and strict error handling (e.g., catching truncated files, OOM mitigation).</li>
+</ul>
+<h3>OUT OF SCOPE</h3>
+<ul>
+<li>Learning experimental procedure semantics (e.g., sequence of steps).</li>
+<li>Chemical reasoning (e.g., identifying liquids, states of matter, or reactions).</li>
+<li>Predicting whether an experiment is scientifically correct beyond spatial layout.</li>
+<li>Automatic generation of external ground truth labels (strictly relying on human verification).</li>
+<li>Claiming general-purpose laboratory understanding beyond the 25 trained classes.</li>
+</ul>
+<hr />
+<h2>7. Functional requirements</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR1</td>
+<td>Image Input</td>
+<td>The system must accept standard RGB images (JPEG, PNG).</td>
+</tr>
+<tr>
+<td>FR2</td>
+<td>Quality Assessment</td>
+<td>The system must reject severely corrupted or truncated images.</td>
+</tr>
+<tr>
+<td>FR3</td>
+<td>Equipment Detection</td>
+<td>The system must detect objects matching the 25-class ChemEq25 taxonomy.</td>
+</tr>
+<tr>
+<td>FR4</td>
+<td>Spatial Normalization</td>
+<td>Bounding boxes must be normalized to relative coordinates [0, 1].</td>
+</tr>
+<tr>
+<td>FR5</td>
+<td>Rule Evaluation</td>
+<td>The system must parse a <code>SetupSpecification</code> and evaluate spatial conditions.</td>
+</tr>
+<tr>
+<td>FR6</td>
+<td>Compliance Reporting</td>
+<td>The system must output COMPLIANT, NON_COMPLIANT, UNSPECIFIED, AMBIGUOUS, or ERROR states.</td>
+</tr>
+<tr>
+<td>FR7</td>
+<td>Structured Reporting</td>
+<td>The pipeline must serialize the entire evaluation tree into JSON.</td>
+</tr>
+</tbody>
+</table>
+<h2>8. Non-functional requirements</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NFR1</td>
+<td>Reliability</td>
+<td>The pipeline must fail safely on invalid inputs without crashing.</td>
+</tr>
+<tr>
+<td>NFR2</td>
+<td>Determinism</td>
+<td>Repeated evaluation of identical inputs must yield identical outputs.</td>
+</tr>
+<tr>
+<td>NFR3</td>
+<td>Maintainability</td>
+<td>Perception (ML) and reasoning (Rules) must remain architecturally decoupled.</td>
+</tr>
+<tr>
+<td>NFR4</td>
+<td>Error Handling</td>
+<td>Missing configurations or malformed geometries must be logged gracefully.</td>
+</tr>
+<tr>
+<td>NFR5</td>
+<td>Resource Efficiency</td>
+<td>The system must operate within standard CPU memory bounds without unbounded growth.</td>
+</tr>
+<tr>
+<td>NFR6</td>
+<td>Testability</td>
+<td>The spatial rule engine must be 100% testable using synthetic deterministic fixtures.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9. Architecture/design</h2>
+<p>The Lab Lens architecture follows a strict, unidirectional data flow separating the non-deterministic perception layer from the deterministic reasoning layer.</p>
+<ol>
+<li><strong>Input Image:</strong> The raw artifact provided by the user.</li>
+<li><strong>Image Quality Gate:</strong> Validates file integrity, dimensions, and readability before inference.</li>
+<li><strong>YOLO Detector:</strong> The Ultralytics YOLOv8n model infers bounding boxes and class probabilities.</li>
+<li><strong>Detection Normalization:</strong> Translates device-specific bounding boxes into a standardized <code>Detection</code> dataclass.</li>
+<li><strong>Spatial Reasoning:</strong> Calculates geometric predicates (e.g., intersection over union, centroid deltas).</li>
+<li><strong>Rule Engine:</strong> Matches normalized detections against the expected counts and relationships in the configuration.</li>
+<li><strong>Compliance Scorer:</strong> Aggregates passing and failing conditions into a final compliance formula.</li>
+<li><strong>Report/CLI:</strong> Serializes the outcome to the terminal or a JSON file.</li>
+</ol>
+<p><em>Explicitly: YOLO detects objects. The rule engine determines compliance. The two concerns are intentionally separated.</em></p>
+<p><code>mermaid
+graph TD
+    A[Input Image] --&gt; B[Image Quality Gate]
+    B --&gt; C[YOLOv8n Detector]
+    C --&gt; D[Detection Normalization]
+    D --&gt; E[Spatial Reasoning Engine]
+    F[Setup Specification JSON] --&gt; G[Rule Engine]
+    E --&gt; G
+    G --&gt; H[Compliance Scorer]
+    H --&gt; I[JSON / CLI Report]</code></p>
+<hr />
+<h2>10. Workflow</h2>
+<p>The workflow tracks the lifecycle of an evaluation request, emphasizing early-exit failure paths to ensure robustness.</p>
+<p>```mermaid
+sequenceDiagram
+    participant User
+    participant Pipeline as LabLensPipeline
+    participant Gate as QualityGate
+    participant ML as YOLOv8n
+    participant Spatial as SpatialEngine
+    participant Spec as SetupSpecification</p>
+<pre><code>User-&gt;&gt;Pipeline: evaluate(image_path, spec)
+Pipeline-&gt;&gt;Gate: validate(image_path)
+alt is invalid
+    Gate--&gt;&gt;Pipeline: Error
+    Pipeline--&gt;&gt;User: Report(ERROR, reasons)
+end
+Pipeline-&gt;&gt;ML: predict(image, conf_threshold)
+ML--&gt;&gt;Pipeline: raw_boxes
+Pipeline-&gt;&gt;Pipeline: normalize_detections(raw_boxes)
+Pipeline-&gt;&gt;Spec: parse_rules()
+Pipeline-&gt;&gt;Spatial: compute_relationships(normalized, Spec)
+Spatial--&gt;&gt;Pipeline: rule_evaluations
+Pipeline-&gt;&gt;Pipeline: calculate_score()
+Pipeline--&gt;&gt;User: Report(COMPLIANT / NON_COMPLIANT)
+</code></pre>
+<p>```</p>
+<hr />
+<h2>11. Dataset description</h2>
+<p>The foundation of the detection layer is the ChemEq25 dataset, originally containing 25 classes of laboratory equipment. However, deep forensic investigation revealed severe data integrity issues that required extensive engineering before it could be used.</p>
+<h2>12. Dataset engineering/cleaning</h2>
+<p><strong>Investigations &amp; Corrections:</strong>
+- <strong>Local Extraction Corruption:</strong> The original zip archives contained malformed DOS 8.3 short filenames that caused extraction failures and mismatched label files across Windows environments.
+- <strong>Malformed Annotations:</strong> Several labels were completely empty or contained malformed bounding box formats.
+- <strong>Duplicate Leakage:</strong> A rigorous SHA-256 analysis discovered extensive exact-duplicate leakage across the training, validation, and test splits, destroying the validity of the original test sets.
+- <strong>Deterministic Repair:</strong> We developed an automated pipeline to deduplicate the dataset, strictly enforcing a cryptographic boundary to protect the test set. All cross-split duplicates were purged from the training set to prevent data contamination.
+- <strong>Quarantining:</strong> 22 ambiguous source cases (16 suspicious bounding boxes and 6 empty labels) were conservatively quarantined to prevent silent relabeling.</p>
+<p><strong>Final Verified ChemEq25 Development Dataset:</strong>
+| Split | Image Count | Instance Count |
+|---|---|---|
+| Train | 2891 | ~4300 |
+| Validation | 878 | ~1300 |
+| Test | 455 | ~770 |
+| <strong>Total</strong> | <strong>4224</strong> | <strong>6377</strong> |</p>
+<p><em>Note: The protected 455-image test set was structurally isolated and remains untouched to serve as the immutable benchmark.</em></p>
+<hr />
+<h2>13. Class taxonomy</h2>
+<p>The system identifies the following 25 apparatus classes:
+1. Beaker
+2. Burette
+3. Crucible
+4. Erlenmeyer Flask
+5. Evaporating Dish
+6. Florence Flask
+7. Funnel
+8. Glass Tube
+9. Graduated Cylinder
+10. Iron Ring
+11. Measuring Cup
+12. Mortar and Pestle
+13. Pipette
+14. Retort Stand
+15. Rubber Stopper
+16. Spatula
+17. Spring Scale
+18. Syringe
+19. Test Tube
+20. Test Tube Brush
+21. Test Tube Holder
+22. Test Tube Rack
+23. Thermometer
+24. Volumetric Flask
+25. Wash Bottle</p>
+<hr />
+<h2>14. ML methodology</h2>
+<p>We utilized the <strong>YOLOv8n</strong> (Nano) architecture for the detection layer. YOLO is a highly optimized one-stage object detector that predicts bounding boxes and class probabilities directly from full images in a single forward pass. </p>
+<h2>15. Training configuration</h2>
+<p><strong>Hyperparameters and Decisions:</strong>
+- <strong>Pretrained Weights:</strong> We utilized transfer learning, initializing from COCO-pretrained weights to leverage low-level feature extraction capabilities.
+- <strong>Image Size:</strong> 640x640, balancing computational constraints with sufficient resolution for small objects (e.g., rubber stoppers).
+- <strong>Epochs:</strong> Limited to stable convergence bounds observed during training profiling.
+- <strong>Batch Size:</strong> Strictly bound to 8/16 depending on available physical memory (further detailed in Section 13).
+- <strong>Inference Threshold:</strong> Configurable at runtime, normally evaluated at <code>conf=0.25</code>.
+- <strong>Reproducibility:</strong> Deterministic seeds were configured to ensure repeatable initialization and augmentation.</p>
+<p>Crucially, the ML layer is intentionally oblivious to the concept of an "experiment". It <em>does not</em> learn spatial compliance; it only learns bounding-box priors for physical objects.</p>
+<hr />
+<h2>16. OOM/memory investigation</h2>
+<p>During local CPU training, the pipeline encountered catastrophic Out-Of-Memory (OOM) failures. A forensic profiling investigation revealed severe intra-epoch Resident Set Size (RSS) growth, where memory consumption escalated relentlessly during the dataloader worker processes.</p>
+<p><strong>Investigation &amp; Outcome:</strong>
+The growth was initially suspected to be a memory leak within the PyTorch/Ultralytics multi-processing caching layers. To mitigate this:
+- We reduced the <code>batch_size</code> from automatic to a hardcoded low value.
+- We restricted <code>workers</code> to 0 or 1 to force main-thread data loading, disabling problematic shared-memory allocations.
+- We explicitly disabled RAM caching (<code>cache=False</code>).</p>
+<p>While these engineering constraints stabilized the memory profile and allowed training to successfully complete, we are scientifically careful to note that the underlying mechanism in the C++/Python binding layer was bypassed rather than definitively resolved.</p>
+<hr />
+<h2>17. Model evaluation</h2>
+<p>Following the dataset curation and stabilized training, the YOLOv8n detector was evaluated on both the validation split (used for early stopping) and the immutable, protected held-out test split.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Validation</th>
+<th>Test (Held-Out)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Precision</td>
+<td>~ 0.880</td>
+<td>~ 0.839</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>~ 0.865</td>
+<td>~ 0.839</td>
+</tr>
+<tr>
+<td>mAP@0.50</td>
+<td>0.897</td>
+<td>0.881</td>
+</tr>
+<tr>
+<td>mAP@0.50:0.95</td>
+<td>0.612</td>
+<td>0.596</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis:</strong>
+The performance on the protected test set is the critical measurement of generalizability within the source domain. The slight drop in mAP from Validation (0.897) to Test (0.881) is mathematically expected and demonstrates that the deduplication barriers successfully prevented validation overfitting. Certain small classes (e.g., Rubber Stopper) exhibit lower recall due to pixel density, establishing known limitations for the pipeline.</p>
+<hr />
+<h2>18. Confidence-threshold regression bug</h2>
+<p>During end-to-end integration testing, a severe behavioral discrepancy was identified: direct invocations of the Ultralytics model yielded different results than the <code>LabLensPipeline</code> when tested on identical images.</p>
+<p><strong>Root Cause:</strong>
+The <code>YOLODetector.predict(..., conf_threshold=...)</code> method failed to propagate the threshold parameter to the underlying <code>model.predict()</code> call. Consequently, Ultralytics applied its internal default threshold, artificially truncating low-confidence detections before Lab Lens could evaluate them.</p>
+<p><strong>Resolution:</strong>
+The bug was patched by strictly forwarding <code>conf=conf_threshold</code> into the ML layer. Regression tests were immediately added to assert exact parity between raw YOLO calls and the pipeline wrapper across varying thresholds. This incident highlights the necessity of unit-testing adapter layers wrapping black-box neural network libraries.</p>
+<hr />
+<h2>19. Spatial reasoning</h2>
+<p>The spatial reasoning engine converts raw coordinates into abstract geometric relations. The <code>BoundingBox</code> class normalizes coordinates to $[0.0, 1.0]$. </p>
+<p>Deterministic geometry functions are computed as follows:
+- <strong>left_of / right_of:</strong> Evaluates horizontal centroid deltas.
+- <strong>above / below:</strong> Evaluates vertical centroid deltas.
+- <strong>inside_region:</strong> Verifies if a point or box centroid is strictly bounded by $X_{min} \le X \le X_{max}$ and $Y_{min} \le Y \le Y_{max}$.
+- <strong>overlaps:</strong> Computes Intersection over Union (IoU) &gt; 0.
+- <strong>near / far:</strong> Computes Euclidean distance between centroids against a predefined semantic threshold.</p>
+<p>This deterministic approach ensures that identical bounding boxes will always yield the exact same spatial relationship, completely bypassing the non-determinism inherent in ML models.</p>
+<hr />
+<h2>20. Rule-based compliance</h2>
+<p>A <code>SetupSpecification</code> defines the ground truth for an experiment. It specifies:
+- <code>required_objects</code>: e.g., Beaker (min:1, max:1).
+- <code>relations</code>: e.g., <code>["Thermometer", "inside_region", "Beaker"]</code>.</p>
+<p><strong>Compliance States:</strong>
+- <strong>COMPLIANT:</strong> All counts are satisfied, no extra objects exist, and all spatial relations evaluate to True.
+- <strong>NON_COMPLIANT:</strong> A required object is missing, an illegal extra object is present, or a spatial relation is violated.
+- <strong>UNSPECIFIED:</strong> The configuration contains zero explicit conditions, rendering a score mathematically null.
+- <strong>AMBIGUOUS / ERROR:</strong> Malformed configurations or pipeline failures.</p>
+<p>The score is calculated simply as:<br />
+$$ Score = \frac{Satisfied_Conditions}{Total_Explicit_Conditions} $$
+If no explicit conditions exist, the score is explicitly skipped to prevent division by zero or falsely reporting 100%.</p>
+<hr />
+<h2>21. Synthetic spatial validation</h2>
+<p>To rigorously verify the rule engine independently of the YOLO model, we engineered a suite of 21 canonical synthetic fixtures. These fixtures provide hardcoded bounding boxes mathematically crafted to trigger specific edge cases (e.g., exact boundary overlap, missing objects, extra objects, inverted Cartesian coordinates).</p>
+<p>Integration testing against these fixtures guarantees that the <code>LabLensPipeline</code> evaluates geometric intersections with 100% precision. The synthetic harness proves that any error in the final end-to-end system originates from the perception layer (YOLO inaccuracies), not the reasoning layer.</p>
+<hr />
+<h2>22. Real-world pipeline validation</h2>
+<p>The system contains an integration scaffolding for <code>Dataset/SpatialComplianceReal</code>, allowing end-to-end testing on real images. Currently, these images utilize AI-generated silver labels to test the ingestion pathways. It must be explicitly noted that the human verification count for these silver labels is zero; they serve exclusively to validate that the engineering pipeline can successfully deserialize JSON payloads and stream them into the rule engine without crashing.</p>
+<hr />
+<h2>23. End-to-end pipeline</h2>
+<p>The <code>LabLensPipeline.run</code> method orchestrates the entire workflow. It outputs a comprehensive JSON payload containing metadata, raw detections, rule evaluations, missing/extra object lists, and the final compliance score. A human-readable CLI reporter consumes this JSON to print color-coded terminal summaries.</p>
+<p><em>Example execution paths:</em>
+1. Image ingested $\rightarrow$ 3 objects detected $\rightarrow$ Rules require 2 objects $\rightarrow$ Extra object flagged $\rightarrow$ Output <code>NON_COMPLIANT</code> (Score 0.8).
+2. Image ingested $\rightarrow$ Corrupted bits $\rightarrow$ CV2 read failure $\rightarrow$ Output <code>ERROR</code>.</p>
+<hr />
+<h2>24. Robustness/error handling</h2>
+<p>Lab Lens is built on defensive programming principles. Tested failure vectors include:
+- <strong>Unreadable images:</strong> Safely caught via <code>cv2.imread</code> None-checks.
+- <strong>Invalid boundaries:</strong> The <code>BoundingBox</code> class automatically rejects coordinates where $X_{min} \ge X_{max}$.
+- <strong>Missing Specifications:</strong> The pipeline gracefully returns <code>UNSPECIFIED</code> rather than crashing with <code>KeyError</code>.
+- <strong>Memory safety:</strong> Garbage collection and local variable scoping are utilized within tight loops.</p>
+<p>The system is mathematically guaranteed to fail safely and visibly, providing detailed JSON logs rather than silently generating misleading predictions.</p>
+<hr />
+<h2>25. External benchmark protocol/status</h2>
+<p>To evaluate true real-world generalization, we established the framework for <code>ExternalLabBench</code> sourced independently from Wikimedia Commons. </p>
+<p><strong>Current Verified Status: EXTERNAL_DATASET_INCOMPLETE</strong>
+- <strong>Candidates Downloaded:</strong> 10
+- <strong>Exact Duplicates:</strong> 0 (Verified via SHA-256 against ChemEq25).
+- <strong>Near-Duplicates:</strong> 0 (Screened via dHash Hamming distance; <em>note: dHash is a deterministic visual screening heuristic, not a mathematical proof of absolute semantic uniqueness</em>).
+- <strong>Provenance Complete:</strong> 6/10
+- <strong>License Metadata Complete:</strong> 10/10
+- <strong>Human Annotation:</strong> 0
+- <strong>Accepted Benchmark / Dev / Final Test Splits:</strong> 0</p>
+<p>Because automated ML labels are strictly forbidden from acting as ground truth, external model evaluation metrics currently sit at <code>N/A</code>. The dataset remains locked pending independent human verification.</p>
+<hr />
+<h2>26. Human annotation protocol</h2>
+<p>We engineered a bespoke OpenCV-based CLI tool (<code>scripts/annotate_external_cli.py</code>) to facilitate human review of the external benchmark. 
+<strong>Protocol Rules:</strong>
+- The tool strictly prevents the invocation of YOLO or <code>best.pt</code>. Reviewers must draw boxes manually using <code>cv2.selectROI</code>.
+- Evaluators can mark images as POSITIVE, NEGATIVE (zero targets), OUT_OF_TAXONOMY (laboratory equipment exists but is not in the 25 classes), or AMBIGUOUS.
+- Bounding boxes and taxonomic mappings are deterministically serialized to an explicit <code>external_annotations.jsonl</code> schema.</p>
+<hr />
+<h2>27. Results summary</h2>
+<p><em>The following table consolidates only verified, scientifically established results.</em></p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Metric / Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A. Dataset Results (ChemEq25)</strong></td>
+<td>Total: 4224 Images. Cross-split leakage: 0</td>
+</tr>
+<tr>
+<td><strong>B. Training Results</strong></td>
+<td>Stable convergence. OOM mitigated via batch/worker caps</td>
+</tr>
+<tr>
+<td><strong>C. Protected Test Results</strong></td>
+<td>mAP@0.50: 0.881, mAP@0.50:0.95: 0.596</td>
+</tr>
+<tr>
+<td><strong>D. Spatial Reasoning Tests</strong></td>
+<td>21 canonical synthetic fixtures passed (100% precision)</td>
+</tr>
+<tr>
+<td><strong>E. Robustness Tests</strong></td>
+<td>Error handling invariants passed (corrupted inputs rejected safely)</td>
+</tr>
+<tr>
+<td><strong>F. External Benchmark Status</strong></td>
+<td><strong>INCOMPLETE</strong>. 10 candidates acquired, pending human review</td>
+</tr>
+<tr>
+<td><strong>G. Total System Test Suite</strong></td>
+<td>100 / 100 tests passed</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>28. Engineering challenges</h2>
+<p><strong>Duplicate Leakage:</strong>
+<em>Problem:</em> Standard open-source datasets frequently suffer from train/test contamination.
+<em>Investigation:</em> Hashing routines identified significant overlaps in ChemEq25.
+<em>Outcome:</em> Implementation of a rigorous SHA-256 deduplication barrier.</p>
+<p><strong>Detector Confidence Propagation Bug:</strong>
+<em>Problem:</em> Pipeline results did not match raw model results.
+<em>Investigation:</em> Debugging revealed the adapter pattern swallowed the <code>conf_threshold</code> variable.
+<em>Outcome:</em> Parameter plumbing fixed; regression test suite expanded to lock behavior.</p>
+<p><strong>Separation of Reasoning:</strong>
+<em>Problem:</em> Initial architectures risk allowing the neural network to 'hallucinate' setup compliance.
+<em>Decision:</em> Strict architectural decoupling. YOLO only draws boxes; symbolic math scores compliance.</p>
+<hr />
+<h2>29. Design decisions/trade-offs</h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Alternative</th>
+<th>Reason</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>YOLOv8n</strong></td>
+<td>Two-stage detectors (e.g., Faster R-CNN)</td>
+<td>Speed and lightweight deployment on CPU environments.</td>
+<td>Minor loss in precision on highly occluded micro-objects.</td>
+</tr>
+<tr>
+<td><strong>Rule Engine</strong></td>
+<td>Learned Setup Classifier</td>
+<td>Neural networks lack interpretability and configurability for safety rules.</td>
+<td>Highly robust, configurable, but requires explicit specification authoring.</td>
+</tr>
+<tr>
+<td><strong>JSONL Annotations</strong></td>
+<td>Standard YOLO txt</td>
+<td>JSONL allows embedding reviewer metadata and complex taxonomy states.</td>
+<td>Requires custom adapter scripts.</td>
+</tr>
+<tr>
+<td><strong>Quarantine Data</strong></td>
+<td>Silently relabel ambiguous boxes</td>
+<td>Preserves ground-truth integrity and scientific honesty.</td>
+<td>Slight reduction in total training volume.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>30. Testing strategy</h2>
+<p>The project relies on a comprehensive, hierarchical <code>pytest</code> infrastructure:
+- <strong>Unit Tests:</strong> Isolate bounding box mathematics, geometry calculations, and JSON parsing.
+- <strong>Integration Tests:</strong> Connect the YOLO detector to the Rule Engine via synthetic fixtures.
+- <strong>Regression Tests:</strong> Prevent the recurrence of the confidence-propagation bug and ensure manifest file integrity.
+- <strong>Robustness Tests:</strong> Force-feed the system corrupted images and empty configurations to assert graceful degradation.
+<strong>Current Verified Result:</strong> 100 tests passed out of 100.</p>
+<hr />
+<h2>31. Security/data integrity/reproducibility</h2>
+<p>Data integrity is enforced cryptographically. The <code>Dataset/ChemEq25_training_verified_final</code> split and the protected test set are validated via explicit SHA-256 manifest checks. The system strictly disables the automatic fabrication of ground truth data, ensuring that evaluation metrics are never polluted by model hallucinations. Furthermore, PyTorch random seeds are fixed, and the entire pipeline is version-controlled via Git to guarantee reproducible research outputs.</p>
+<hr />
+<h2>32. Limitations</h2>
+<p>We explicitly acknowledge the following project limitations:
+- <strong>External Benchmark Incomplete:</strong> Real-world generalization metrics cannot be claimed until the <code>ExternalLabBench</code> undergoes human annotation.
+- <strong>Not a Setup Classifier:</strong> ChemEq25 is purely an object detection dataset. Setup compliance requires the user to manually configure the rules.
+- <strong>No Semantic Chemistry:</strong> The system calculates spatial overlaps; it does not know if a beaker is filled with a hazardous chemical versus water.
+- <strong>Silver Labels:</strong> Current real-world integration pipelines use unverified silver labels strictly for mechanical pipeline testing.</p>
+<hr />
+<h2>33. Future work</h2>
+<p>Future development should prioritize:
+1. <strong>Completing the External Benchmark:</strong> Utilizing the <code>annotate_external_cli.py</code> to finalize human review of the 10 candidates, followed by expanding the pool to 50-100 images with hard-negative mining.
+2. <strong>Domain Adaptation:</strong> Applying augmentation strategies to improve robustness against lighting variations in real-world educational labs.
+3. <strong>Learned Relational Reasoning:</strong> While the current system uses deterministic geometry, future research could explore Graph Neural Networks (GNNs) to infer relationships, though this must remain architecturally separated from the compliance engine.</p>
+<hr />
+<h2>34. Conclusion</h2>
+<p>The <strong>Lab Lens</strong> project successfully demonstrates a highly engineered, robust pipeline for "laboratory equipment detection and configurable rule-based spatial compliance." By strictly isolating the YOLOv8n perception layer from the deterministic geometric rule engine, the system ensures interpretability, safety, and configurability. While the baseline detector achieves strong intra-domain performance (mAP@0.50 of 0.881), the project's foremost achievement is its rigorous software engineering methodology—evidenced by thorough data deduplication, safety-first error handling, and the honest, verifiable staging of the currently incomplete external generalization benchmark. </p>
+<hr />
+<h2>35. References</h2>
+<ol>
+<li>Ultralytics. (2023). YOLOv8 Documentation.</li>
+<li>ChemEq25 Dataset Source Documentation (Referenced within <code>docs/REPORT_REFERENCES.md</code>).</li>
+<li>Project Repository (<code>Ayush-kathil/lab-lens</code>).</li>
+</ol>
+</body>
+</html>
