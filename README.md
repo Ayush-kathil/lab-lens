@@ -184,29 +184,29 @@ The project provides a unified CLI for the entire machine learning and inference
 
 ### Dataset Engineering
 To run the deterministic repair and generate the final isolated dataset splits:
-`ash
+```bash
 uv run python -m lab_lens prepare-dataset --source Dataset/ChemEq25_Raw --output Dataset/ChemEq25_Final
-`
+```
 
 ### Model Training & Evaluation
 To train YOLOv8n locally (as weights are excluded from Git):
-`ash
+```bash
 uv run python -m lab_lens train --dataset Dataset/ChemEq25_Final --config configs/training_final.yaml
-`
+```
 To evaluate the model on the held-out test split:
-`ash
+```bash
 uv run python -m lab_lens evaluate --model runs/detect/train/weights/best.pt --dataset Dataset/ChemEq25_Final
-`
+```
 
 ### Inference & Compliance
 Basic perception inference without spatial reasoning:
-`ash
+```bash
 uv run python -m lab_lens infer --image test-lab.jpg --model runs/detect/train/weights/best.pt
-`
+```
 Full compliance evaluation against a spatial schema:
-`ash
+```bash
 uv run python -m lab_lens infer --image test-lab.jpg --model runs/detect/train/weights/best.pt --setup configs/spatial_rules.yaml
-`
+```
 
 ## 30. JSON Output
 To output structured compliance data for downstream systems:
