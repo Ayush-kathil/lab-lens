@@ -1,7 +1,7 @@
 <h1 align="center">Lab Lens</h1>
 <h3 align="center">Vision-Based Laboratory Equipment Verification &amp; Spatial Compliance</h3>
 
-
+> **Note on Styling:** GitHub explicitly sanitizes custom CSS text colors in Markdown (e.g., `#FACC15` and `#3B82F6`) for security. The semantic HTML layout is maintained above as a clean, compliant fallback without relying on unsupported CSS hacks.
 
 ## 1. Introduction
 Safety and compliance in physical laboratory environments rely not just on the presence of equipment, but on its correct spatial arrangement. **Lab Lens** addresses the laboratory equipment perception problem by decoupling object detection from spatial safety validation. Rather than relying on black-box end-to-end models to predict "safe" or "unsafe" setups, this project introduces a hybrid pipeline: a deep-learning perception layer combined with a configurable, deterministic geometric rule engine. This ensures that safety validation remains transparent, explicitly configurable, and easily interpretable.
@@ -13,7 +13,7 @@ Lab Lens is an automated visual verification system designed to evaluate laborat
 Traditional neural networks are highly capable of object perception but lack the strict interpretability required for safety-critical spatial reasoning. End-to-end models struggle to learn hard geometric constraints and cannot easily adapt to new safety rules without extensive retraining.
 
 ## 4. Motivation
-In chemistry labs, equipment arrangement dictates safety (e.g., a thermometer must be *inside* a beaker, not just placed near it). Decoupling perception from rule validation allows human experts to define explicit safety rules, ensuring reliable compliance without depending on a model's latent understanding of "correctness".
+In chemistry labs, equipment arrangement dictates safety (e.g., a glass rod must be *inside* a beaker, not just placed near it). Decoupling perception from rule validation allows human experts to define explicit safety rules, ensuring reliable compliance without depending on a model's latent understanding of "correctness".
 
 ## 5. Objectives
 1. Train a lightweight object detector (YOLOv8n) for laboratory equipment.
@@ -54,6 +54,8 @@ The architecture enforces a strict boundary between perception and logic:
 - **Rule Engine**: Evaluates deterministic spatial rules and required object counts.
 *Note: YOLOv8n performs object detection only; it does not learn setup correctness or experiment recognition.*
 
+![System Architecture](docs/figures/system_architecture.png)
+
 ## 12. Workflow
 1. **Input:** User provides an image and a configuration schema.
 2. **Quality Assessment:** System verifies image integrity and readability.
@@ -62,6 +64,8 @@ The architecture enforces a strict boundary between perception and logic:
 5. **Spatial Reasoning:** Geometric relations are explicitly calculated.
 6. **Rule Engine:** Conditions are evaluated against the required schema.
 7. **Reporting:** A structured JSON summary is emitted.
+
+![End-to-End Workflow](docs/figures/system_workflow.png)
 
 ## 13. Technologies
 - **Python 3.12**: Core runtime.
@@ -86,7 +90,7 @@ The original dataset suffered from leakage and duplicate corruption. A rigorous 
 *(Note: 4458 was a historical intermediate state; 4224 is the authoritative final count).*
 
 ## 17. ChemEq25 25-Class Taxonomy
-The system explicitly supports the following 25 authoritative classes:
+The system explicitly supports the following 25 authoritative classes derived from the validated dataset source:
 
 | ID | Class | ID | Class |
 |---:|---|---:|---|
@@ -145,6 +149,9 @@ The engine evaluates the detected layout against explicit spatial rules defined 
 
 ## 24. Scoring
 **Condition Coverage Score** = `(Satisfied Explicit Conditions / Total Explicit Conditions) × 100`
+
+![Compliance Flow](docs/figures/compliance_flow.png)
+
 *(Note: If zero conditions exist, the state is UNSPECIFIED. This score strictly represents configuration coverage, not detector confidence or a calibrated safety probability).*
 
 ## 25. Robustness/Error Handling
