@@ -12,6 +12,7 @@ th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; }
 th { padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #f2f2f2; }
 p, li { page-break-inside: avoid; }
 pre { background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; overflow-x: auto; font-family: Consolas, monospace; }
+img { display: block; margin: 20px auto; max-width: 100%; height: auto; border: 1px solid #ccc; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body>
@@ -170,8 +171,7 @@ pre { background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; overflow
 <li><strong>Report/CLI:</strong> Serializes the outcome to the terminal or a JSON file.</li>
 </ol>
 <p><em>Explicitly: YOLO detects objects. The rule engine determines compliance. The two concerns are intentionally separated.</em></p>
-<p><code>mermaid
-graph TD
+<pre><code class="language-mermaid">graph TD
     A[Input Image] --&gt; B[Image Quality Gate]
     B --&gt; C[YOLOv8n Detector]
     C --&gt; D[Detection Normalization]
@@ -179,34 +179,34 @@ graph TD
     F[Setup Specification JSON] --&gt; G[Rule Engine]
     E --&gt; G
     G --&gt; H[Compliance Scorer]
-    H --&gt; I[JSON / CLI Report]</code></p>
+    H --&gt; I[JSON / CLI Report]
+</code></pre>
 <hr />
 <h2>10. Workflow</h2>
 <p>The workflow tracks the lifecycle of an evaluation request, emphasizing early-exit failure paths to ensure robustness.</p>
-<p>```mermaid
-sequenceDiagram
+<pre><code class="language-mermaid">sequenceDiagram
     participant User
     participant Pipeline as LabLensPipeline
     participant Gate as QualityGate
     participant ML as YOLOv8n
     participant Spatial as SpatialEngine
-    participant Spec as SetupSpecification</p>
-<pre><code>User-&gt;&gt;Pipeline: evaluate(image_path, spec)
-Pipeline-&gt;&gt;Gate: validate(image_path)
-alt is invalid
-    Gate--&gt;&gt;Pipeline: Error
-    Pipeline--&gt;&gt;User: Report(ERROR, reasons)
-end
-Pipeline-&gt;&gt;ML: predict(image, conf_threshold)
-ML--&gt;&gt;Pipeline: raw_boxes
-Pipeline-&gt;&gt;Pipeline: normalize_detections(raw_boxes)
-Pipeline-&gt;&gt;Spec: parse_rules()
-Pipeline-&gt;&gt;Spatial: compute_relationships(normalized, Spec)
-Spatial--&gt;&gt;Pipeline: rule_evaluations
-Pipeline-&gt;&gt;Pipeline: calculate_score()
-Pipeline--&gt;&gt;User: Report(COMPLIANT / NON_COMPLIANT)
+    participant Spec as SetupSpecification
+
+    User-&gt;&gt;Pipeline: evaluate(image_path, spec)
+    Pipeline-&gt;&gt;Gate: validate(image_path)
+    alt is invalid
+        Gate--&gt;&gt;Pipeline: Error
+        Pipeline--&gt;&gt;User: Report(ERROR, reasons)
+    end
+    Pipeline-&gt;&gt;ML: predict(image, conf_threshold)
+    ML--&gt;&gt;Pipeline: raw_boxes
+    Pipeline-&gt;&gt;Pipeline: normalize_detections(raw_boxes)
+    Pipeline-&gt;&gt;Spec: parse_rules()
+    Pipeline-&gt;&gt;Spatial: compute_relationships(normalized, Spec)
+    Spatial--&gt;&gt;Pipeline: rule_evaluations
+    Pipeline-&gt;&gt;Pipeline: calculate_score()
+    Pipeline--&gt;&gt;User: Report(COMPLIANT / NON_COMPLIANT)
 </code></pre>
-<p>```</p>
 <hr />
 <h2>11. Dataset description</h2>
 <p>The foundation of the detection layer is the ChemEq25 dataset, originally containing 25 classes of laboratory equipment. However, deep forensic investigation revealed severe data integrity issues that required extensive engineering before it could be used.</p>
@@ -507,4 +507,16 @@ If no explicit conditions exist, the score is explicitly skipped to prevent divi
 <li>Project Repository (<code>Ayush-kathil/lab-lens</code>).</li>
 </ol>
 </body>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true });
+  // Find all pre > code.mermaid and render them
+  document.querySelectorAll('code.language-mermaid').forEach((block, index) => {
+    let rawCode = block.textContent;
+    let div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = rawCode;
+    block.parentNode.replaceWith(div);
+  });
+</script>
 </html>
