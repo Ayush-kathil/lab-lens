@@ -1,7 +1,7 @@
 <h1 align="center">Lab Lens</h1>
 <h3 align="center">Vision-Based Laboratory Equipment Verification &amp; Spatial Compliance</h3>
 
-> **Note on Styling:** GitHub explicitly sanitizes custom CSS text colors in Markdown (e.g., `#FACC15` and `#3B82F6`) for security. The semantic HTML layout is maintained above as a clean, compliant fallback without relying on unsupported CSS hacks.
+
 
 ## 1. Introduction
 Safety and compliance in physical laboratory environments rely not just on the presence of equipment, but on its correct spatial arrangement. **Lab Lens** addresses the laboratory equipment perception problem by decoupling object detection from spatial safety validation. Rather than relying on black-box end-to-end models to predict "safe" or "unsafe" setups, this project introduces a hybrid pipeline: a deep-learning perception layer combined with a configurable, deterministic geometric rule engine. This ensures that safety validation remains transparent, explicitly configurable, and easily interpretable.
