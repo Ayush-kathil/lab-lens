@@ -1,10 +1,12 @@
 import cv2
 import csv
 import os
+import json
 from datetime import datetime
 
 def main():
     manifest_path = 'outputs/external_evaluation/external_manifest.csv'
+    jsonl_path = 'outputs/external_evaluation/external_annotations.jsonl'
     if not os.path.exists(manifest_path):
         print("Manifest not found.")
         return
@@ -18,7 +20,7 @@ def main():
     print("=== ExternalLabBench Human Annotation CLI ===")
     print("Controls:")
     print("  y - Mark as POSITIVE (Opens ROI selector)")
-    print("  n - Mark as NEGATIVE (Empty label file)")
+    print("  n - Mark as NEGATIVE (Empty label)")
     print("  o - Mark as OUT_OF_TAXONOMY")
     print("  a - Mark as AMBIGUOUS")
     print("  r - Mark as REJECT")
@@ -50,25 +52,40 @@ def main():
                 row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
                 
                 print("Select ROI for POSITIVE object. Press SPACE or ENTER to finish selection, c to cancel.")
-                bbox = cv2.selectROI('Annotation CLI', img, fromCenter=False, showCrosshair=True)
-                if bbox != (0,0,0,0):
-                    cls_id = input("Enter ChemEq25 class ID (0-24): ").strip()
-                    notes = input("Annotation notes: ").strip()
-                    
-                    label_name = os.path.splitext(row['filename'])[0] + '.txt'
-                    label_path = os.path.join('Dataset/ExternalLabBench/labels', label_name)
-                    
-                    # Convert to YOLO format
-                    h, w, _ = img.shape
-                    x, y, bw, bh = bbox
-                    cx = (x + bw/2.0) / w
-                    cy = (y + bh/2.0) / h
-                    nw = bw / w
-                    nh = bh / h
-                    
-                    with open(label_path, 'a') as lf:
-                        lf.write(f"{cls_id} {cx} {cy} {nw} {nh} {notes}\n")
-                    print("Saved bounding box.")
+                objects = []
+                while True:
+                    bbox = cv2.selectROI('Annotation CLI', img, fromCenter=False, showCrosshair=True)
+                    if bbox != (0,0,0,0):
+                        cls_id = input("Enter ChemEq25 class ID (0-24): ").strip()
+                        notes = input("Annotation notes: ").strip()
+                        
+                        x, y, bw, bh = bbox
+                        objects.append({
+                            'class_name': f"class_{cls_id}",
+                            'class_id': int(cls_id) if cls_id.isdigit() else -1,
+                            'x_min': int(x),
+                            'y_min': int(y),
+                            'x_max': int(x + bw),
+                            'y_max': int(y + bh),
+                            'annotation_notes': notes
+                        })
+                        
+                        cont = input("Add another box? (y/n): ")
+                        if cont.lower() != 'y':
+                            break
+                    else:
+                        break
+                
+                save_jsonl(jsonl_path, {
+                    'image_id': row['image_id'],
+                    'filename': row['filename'],
+                    'image_status': 'HUMAN_VERIFIED',
+                    'reviewer': reviewer_name,
+                    'review_timestamp': row['annotation_timestamp'],
+                    'ground_truth_status': 'POSITIVE',
+                    'objects': objects
+                })
+                print("Saved POSITIVE annotation.")
                 break
             elif key == ord('n'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
@@ -76,25 +93,61 @@ def main():
                 row['annotator'] = reviewer_name
                 row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
                 
-                label_name = os.path.splitext(row['filename'])[0] + '.txt'
-                label_path = os.path.join('Dataset/ExternalLabBench/labels', label_name)
-                open(label_path, 'w').close()
-                print("Marked NEGATIVE. Created empty label file.")
+                save_jsonl(jsonl_path, {
+                    'image_id': row['image_id'],
+                    'filename': row['filename'],
+                    'image_status': 'HUMAN_VERIFIED',
+                    'reviewer': reviewer_name,
+                    'review_timestamp': row['annotation_timestamp'],
+                    'ground_truth_status': 'NEGATIVE',
+                    'objects': []
+                })
+                print("Marked NEGATIVE. Saved empty object array.")
                 break
             elif key == ord('o'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
                 row['ground_truth_status'] = 'OUT_OF_TAXONOMY'
                 row['annotator'] = reviewer_name
+                row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
+                save_jsonl(jsonl_path, {
+                    'image_id': row['image_id'],
+                    'filename': row['filename'],
+                    'image_status': 'HUMAN_VERIFIED',
+                    'reviewer': reviewer_name,
+                    'review_timestamp': row['annotation_timestamp'],
+                    'ground_truth_status': 'OUT_OF_TAXONOMY',
+                    'objects': []
+                })
                 break
             elif key == ord('a'):
                 row['annotation_status'] = 'HUMAN_VERIFIED'
                 row['ground_truth_status'] = 'AMBIGUOUS'
                 row['annotator'] = reviewer_name
+                row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
+                save_jsonl(jsonl_path, {
+                    'image_id': row['image_id'],
+                    'filename': row['filename'],
+                    'image_status': 'HUMAN_VERIFIED',
+                    'reviewer': reviewer_name,
+                    'review_timestamp': row['annotation_timestamp'],
+                    'ground_truth_status': 'AMBIGUOUS',
+                    'objects': []
+                })
                 break
             elif key == ord('r'):
                 row['annotation_status'] = 'REJECTED'
                 row['ground_truth_status'] = 'REJECT'
                 row['annotator'] = reviewer_name
+                row['annotation_timestamp'] = datetime.utcnow().isoformat() + 'Z'
+                save_jsonl(jsonl_path, {
+                    'image_id': row['image_id'],
+                    'filename': row['filename'],
+                    'image_status': 'REJECTED',
+                    'reviewer': reviewer_name,
+                    'review_timestamp': row['annotation_timestamp'],
+                    'ground_truth_status': 'REJECT',
+                    'objects': []
+                })
                 break
             elif key == ord('q'):
                 print("Quitting...")
@@ -105,6 +158,19 @@ def main():
     cv2.destroyAllWindows()
     save_manifest(manifest_path, records)
     print("Done reviewing.")
+
+def save_jsonl(path, data):
+    # Validate schema loosely
+    if data['ground_truth_status'] in ['NEGATIVE', 'OUT_OF_TAXONOMY', 'AMBIGUOUS', 'REJECT']:
+        assert len(data['objects']) == 0
+    
+    for obj in data['objects']:
+        assert obj['x_min'] < obj['x_max']
+        assert obj['y_min'] < obj['y_max']
+        assert 0 <= obj['class_id'] <= 24
+        
+    with open(path, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(data) + '\n')
 
 def save_manifest(path, records):
     if not records: return

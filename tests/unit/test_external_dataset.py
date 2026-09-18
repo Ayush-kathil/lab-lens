@@ -59,15 +59,64 @@ def test_final_test_manifest_integrity():
     os.remove(lock_path)
 
 def test_annotation_tool_validation():
-    # Simulate valid ROI bbox coordinates
-    h, w = 1000, 1000
-    bbox = (100, 100, 200, 200) # x, y, bw, bh
-    x, y, bw, bh = bbox
-    cx = (x + bw/2.0) / w
-    cy = (y + bh/2.0) / h
-    nw = bw / w
-    nh = bh / h
-    assert cx == 0.2
-    assert cy == 0.2
-    assert nw == 0.2
-    assert nh == 0.2
+    # Valid POSITIVE
+    valid_pos = {
+        'image_id': 'ext_001',
+        'filename': 'ext_001.jpg',
+        'image_status': 'HUMAN_VERIFIED',
+        'reviewer': 'Human',
+        'review_timestamp': '2026-09-18T00:00:00Z',
+        'ground_truth_status': 'POSITIVE',
+        'objects': [{
+            'class_name': 'class_10',
+            'class_id': 10,
+            'x_min': 100,
+            'y_min': 100,
+            'x_max': 200,
+            'y_max': 200,
+            'annotation_notes': 'clean'
+        }]
+    }
+    
+    import sys
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from scripts.annotate_external_cli import save_jsonl
+    
+    # Deterministic serialization (json.dumps handles this by default, but let's test it works)
+    temp_jsonl = 'temp_ann.jsonl'
+    if os.path.exists(temp_jsonl): os.remove(temp_jsonl)
+    save_jsonl(temp_jsonl, valid_pos)
+    assert os.path.exists(temp_jsonl)
+    
+    # Valid NEGATIVE
+    valid_neg = valid_pos.copy()
+    valid_neg['ground_truth_status'] = 'NEGATIVE'
+    valid_neg['objects'] = []
+    save_jsonl(temp_jsonl, valid_neg)
+    
+    # AMBIGUOUS (no forced labels)
+    valid_amb = valid_pos.copy()
+    valid_amb['ground_truth_status'] = 'AMBIGUOUS'
+    valid_amb['objects'] = []
+    save_jsonl(temp_jsonl, valid_amb)
+    
+    # Invalid Box Coordinates
+    invalid_box = valid_pos.copy()
+    invalid_box['objects'] = [{'class_id': 10, 'x_min': 200, 'x_max': 100, 'y_min': 100, 'y_max': 200}]
+    with pytest.raises(AssertionError):
+        save_jsonl(temp_jsonl, invalid_box)
+        
+    # Unknown Class
+    invalid_cls = valid_pos.copy()
+    invalid_cls['objects'] = [{'class_id': 99, 'x_min': 100, 'x_max': 200, 'y_min': 100, 'y_max': 200}]
+    with pytest.raises(AssertionError):
+        save_jsonl(temp_jsonl, invalid_cls)
+
+    # Annotation path never invokes YOLO
+    with open('scripts/annotate_external_cli.py', 'r') as f:
+        content = f.read()
+        assert 'YOLO' not in content
+        assert 'best.pt' not in content
+        assert 'model.predict' not in content
+    
+    os.remove(temp_jsonl)

@@ -27,7 +27,7 @@ def get_all_reference_images():
         'Dataset/ChemEq25_training/images',
         'Dataset/ChemEq25_training_verified_v2/images',
         'Dataset/ChemEq25_training_verified_final/images',
-        'Dataset/ChemEq25/images/test'
+        'Dataset/ChemEq25/test/images'
     ]
     ref_images = []
     for d in ref_dirs:
@@ -183,6 +183,47 @@ def main():
         writer.writerows(dup_audit_records)
         
     print(f"Audited {len(records)} external candidates.")
+    
+    # Phase 2: Validate the 10 Image Files
+    print("\n--- Physical File Validation Summary ---")
+    all_valid = True
+    for row in records:
+        img_path = os.path.join('Dataset/ExternalLabBench/images', row['filename'])
+        if not os.path.exists(img_path):
+            print(f"[{row['image_id']}] FAILED: File does not exist")
+            all_valid = False
+            continue
+            
+        img = cv2.imread(img_path)
+        if img is None:
+            print(f"[{row['image_id']}] FAILED: Unreadable by OpenCV")
+            all_valid = False
+            continue
+            
+        h, w, c = img.shape
+        if c != 3:
+            print(f"[{row['image_id']}] FAILED: Invalid channels (expected 3, got {c})")
+            all_valid = False
+            
+        # Optional: check dimensions match manifest (although width/height in manifest might be from source, let's just log)
+        if str(w) != str(row.get('width')) or str(h) != str(row.get('height')):
+            # The API dimensions can differ from downloaded bytes if downscaled, so we won't strictly fail, just note
+            pass
+            
+        if not row['source_page_url']:
+            print(f"[{row['image_id']}] FAILED: source_page_url is empty")
+            all_valid = False
+            
+        if not row['direct_image_url']:
+            print(f"[{row['image_id']}] FAILED: direct_image_url is empty")
+            all_valid = False
+
+        if row.get('license', 'Unknown') in ['Unknown', '', 'None']:
+            print(f"[{row['image_id']}] FAILED: missing license")
+            all_valid = False
+            
+    if all_valid:
+        print(f"All {len(records)} candidates passed physical validation.")
 
 if __name__ == '__main__':
     main()

@@ -9,7 +9,7 @@ STATUS: EXTERNAL_DATASET_INCOMPLETE
 - **Development Count**: 0
 - **Final Test Count**: 0
 - **Exact Duplicates**: 0 (Audited vs all ChemEq25 subsets)
-- **Near-Duplicate Candidates**: 0 (Audited via dHash)
+- **Near-Duplicate Candidates**: 0 (Audited via dHash; note that dHash is a deterministic candidate-screening heuristic for visual similarity, not a mathematical proof of absolute semantic uniqueness)
 - **Provenance Completeness**: 6 / 10
 - **License Completeness**: 10 / 10
 - **Evaluation Metrics**: N/A
